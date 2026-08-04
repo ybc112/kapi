@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { Gamepad2, Loader2, AlertCircle, Play, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,7 +25,7 @@ export default function Game() {
         }
       }
       setLoading(false);
-    }, 2500);
+    }, 3000);
     return () => clearTimeout(timer);
   }, [started]);
 
@@ -36,8 +36,8 @@ export default function Game() {
   };
 
   return (
-    <div className="page-fade-in mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="page-fade-in mx-auto min-h-screen max-w-5xl px-4 py-6">
+      <div className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="hand text-2xl font-black text-[#8A5F38] sm:text-3xl">卡皮巴拉冲冲冲</h1>
           <p className="mt-1 text-sm text-[#8A7258]">超解压合成小游戏，随时随地来一局</p>
@@ -52,33 +52,28 @@ export default function Game() {
       </div>
 
       {!started ? (
-        <div className="capy-section flex flex-col items-center py-16 text-center">
-          <div className="relative mb-8">
+        <div className="capy-section flex flex-col items-center px-4 py-12 text-center sm:py-16">
+          <div className="relative mb-6">
             <div className="absolute inset-0 rounded-full bg-[#F0A568]/20 blur-3xl" />
-            <img
-              src="/game-capy-rush-logo.png"
-              alt="卡皮巴拉冲冲冲"
-              className="relative h-32 w-32 rounded-3xl object-cover shadow-2xl shadow-[#8A5F38]/20 ring-2 ring-[#F0A568]/30 lg:h-40 lg:w-40"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/logo.jpg";
-              }}
-            />
+            <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-[#F5E7C2] to-[#FDEBD7] text-5xl shadow-2xl shadow-[#8A5F38]/20 ring-2 ring-[#F0A568]/30 sm:h-32 sm:w-32 lg:h-40 lg:w-40">
+              🦫
+            </div>
             <span className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#F0A568] text-[#FFFDF6]">
               <Gamepad2 className="h-4 w-4" />
             </span>
           </div>
-          <h2 className="hand mb-2 text-3xl font-black text-[#8A5F38]">准备好了吗？</h2>
-          <p className="mb-8 max-w-md text-sm text-[#8A7258]">
+          <h2 className="hand mb-2 text-2xl font-black text-[#8A5F38] sm:text-3xl">准备好了吗？</h2>
+          <p className="mb-8 max-w-md px-2 text-sm text-[#8A7258]">
             点击下方按钮进入游戏。若首次加载较慢，请耐心等待可爱的卡皮巴拉出来陪你玩～
           </p>
-          <button onClick={handleStart} className="capy-btn-main px-10 py-4 text-lg">
+          <button onClick={handleStart} className="capy-btn-main px-8 py-4 text-base sm:px-10 sm:py-4 sm:text-lg">
             <Play className="h-5 w-5 fill-current" />
             开始游戏
           </button>
         </div>
       ) : (
-        <div className="capy-section p-2 sm:p-4">
-          <div className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-[#F7F1E2] sm:aspect-[4/3]">
+        <div className="capy-section p-1.5 sm:p-4">
+          <div className="relative w-full overflow-hidden rounded-2xl bg-[#F7F1E2]" style={{ minHeight: "60vh", height: "auto" }}>
             {loading && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-[#8A5F38]">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -90,7 +85,9 @@ export default function Game() {
               src={GAME_SRC}
               title="卡皮巴拉冲冲冲"
               className={cn("h-full w-full border-0", (loading || iframeError) && "hidden")}
+              style={{ minHeight: "60vh", height: "auto" }}
               allow="fullscreen"
+              scrolling="yes"
               onLoad={() => setLoading(false)}
               onError={() => {
                 setLoading(false);

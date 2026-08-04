@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { BrowserProvider, formatEther, JsonRpcSigner, type Eip1193Provider } from "ethers";
 
 const BSC_RPC_URL = "https://bsc-rpc.publicnode.com";
@@ -7,6 +7,8 @@ const BSC_CHAIN_ID = 56;
 type EthereumProvider = Eip1193Provider & {
   on?: (event: string, handler: (...args: unknown[]) => void) => void;
   removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
+  isMetaMask?: boolean;
+  isConnected?: () => boolean;
 };
 
 interface EthereumWindow extends Window {
@@ -20,17 +22,25 @@ export function useWallet() {
   const [chainId, setChainId] = useState<number>(0);
   const [balance, setBalance] = useState<string>("0");
   const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string>("");
 
   const hasMetaMask = typeof window !== "undefined" && Boolean((window as EthereumWindow).ethereum);
 
   const updateAccountState = useCallback(async (newProvider: BrowserProvider, address: string) => {
     setAccount(address);
-    const network = await newProvider.getNetwork();
-    const newChainId = Number(network.chainId);
-    setChainId(newChainId);
-    const newBalance = await newProvider.getBalance(address);
-    setBalance(parseFloat(formatEther(newBalance)).toFixed(4));
+    try {
+      const network = await newProvider.getNetwork();
+      setChainId(Number(network.chainId));
+    } catch {
+      setChainId(0);
+    }
+    try {
+      const newBalance = await newProvider.getBalance(address);
+      setBalance(parseFloat(formatEther(newBalance)).toFixed(4));
+    } catch {
+      setBalance("0");
+    }
   }, []);
 
   const connectWallet = useCallback(async () => {
@@ -53,6 +63,11 @@ export function useWallet() {
       await updateAccountState(newProvider, accounts[0]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "连接钱包失败");
+      setProvider(null);
+      setSigner(null);
+      setAccount("");
+      setChainId(0);
+      setBalance("0");
     } finally {
       setLoading(false);
     }
@@ -101,7 +116,35 @@ export function useWallet() {
   }, [hasMetaMask]);
 
   useEffect(() => {
-    if (!hasMetaMask || !provider) return;
+    if (!hasMetaMask) {
+      setInitialized(true);
+      return;
+    }
+
+    const eth = (window as EthereumWindow).ethereum!;
+
+    const restoreConnection = async () => {
+      try {
+        const newProvider = new BrowserProvider(eth);
+        const accounts = (await eth.request?.({ method: "eth_accounts" })) as string[] | undefined;
+        if (accounts && accounts.length > 0) {
+          const newSigner = await newProvider.getSigner();
+          setProvider(newProvider);
+          setSigner(newSigner);
+          await updateAccountState(newProvider, accounts[0]);
+        }
+      } catch {
+        // ignore auto-connect errors
+      } finally {
+        setInitialized(true);
+      }
+    };
+
+    restoreConnection();
+  }, [hasMetaMask, updateAccountState]);
+
+  useEffect(() => {
+    if (!hasMetaMask) return;
 
     const eth = (window as EthereumWindow).ethereum!;
     const handleAccountsChanged = (accounts: unknown) => {
@@ -129,7 +172,7 @@ export function useWallet() {
       eth.removeListener?.("accountsChanged", handleAccountsChanged);
       eth.removeListener?.("chainChanged", handleChainChanged);
     };
-  }, [hasMetaMask, provider, account, disconnectWallet, updateAccountState]);
+  }, [hasMetaMask, account, disconnectWallet, updateAccountState]);
 
   return {
     hasMetaMask,
@@ -140,7 +183,7 @@ export function useWallet() {
     balance,
     isBSC: chainId === BSC_CHAIN_ID,
     isConnected: Boolean(account && signer),
-    loading,
+    loading: loading || !initialized,
     error,
     connectWallet,
     disconnectWallet,

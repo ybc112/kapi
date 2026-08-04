@@ -58,8 +58,6 @@ export default function Header() {
 
         <div className="hidden items-center gap-6 text-sm font-bold text-[#4A3524] md:flex">
           <NavLink to="#top">首页</NavLink>
-          <NavLink to="#bulletin">双现金流</NavLink>
-          <NavLink to="#tickets">游戏生态</NavLink>
           <NavLink to="/mint">Mint发射</NavLink>
           <NavLink to="/mint-launches">Mint已发射</NavLink>
           <NavLink to="/meme-launch">Meme发射</NavLink>
