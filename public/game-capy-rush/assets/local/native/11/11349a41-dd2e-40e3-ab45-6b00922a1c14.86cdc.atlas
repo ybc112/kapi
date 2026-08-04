@@ -1,0 +1,125 @@
+
+caidai2.png
+size: 243,152
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+hongd
+  rotate: false
+  xy: 2, 123
+  size: 27, 27
+  orig: 27, 27
+  offset: 0, 0
+  index: -1
+piaodai7
+  rotate: false
+  xy: 2, 123
+  size: 27, 27
+  orig: 27, 27
+  offset: 0, 0
+  index: -1
+piaodai8
+  rotate: false
+  xy: 2, 123
+  size: 27, 27
+  orig: 27, 27
+  offset: 0, 0
+  index: -1
+zid
+  rotate: false
+  xy: 2, 123
+  size: 27, 27
+  orig: 27, 27
+  offset: 0, 0
+  index: -1
+hongx
+  rotate: false
+  xy: 109, 2
+  size: 58, 54
+  orig: 58, 54
+  offset: 0, 0
+  index: -1
+huangx
+  rotate: false
+  xy: 130, 111
+  size: 61, 39
+  orig: 61, 39
+  offset: 0, 0
+  index: -1
+lanx
+  rotate: true
+  xy: 60, 69
+  size: 46, 48
+  orig: 46, 48
+  offset: 0, 0
+  index: -1
+lvd
+  rotate: true
+  xy: 193, 106
+  size: 44, 48
+  orig: 44, 48
+  offset: 0, 0
+  index: -1
+lvx
+  rotate: true
+  xy: 2, 76
+  size: 45, 56
+  orig: 45, 56
+  offset: 0, 0
+  index: -1
+piaodai1
+  rotate: false
+  xy: 60, 117
+  size: 33, 33
+  orig: 33, 33
+  offset: 0, 0
+  index: -1
+piaodai2
+  rotate: true
+  xy: 110, 63
+  size: 46, 48
+  orig: 46, 48
+  offset: 0, 0
+  index: -1
+piaodai3
+  rotate: false
+  xy: 95, 117
+  size: 33, 33
+  orig: 33, 33
+  offset: 0, 0
+  index: -1
+piaodai4
+  rotate: true
+  xy: 2, 24
+  size: 50, 51
+  orig: 50, 51
+  offset: 0, 0
+  index: -1
+piaodai5
+  rotate: false
+  xy: 160, 58
+  size: 47, 46
+  orig: 47, 46
+  offset: 0, 0
+  index: -1
+piaodai6
+  rotate: false
+  xy: 169, 2
+  size: 56, 54
+  orig: 56, 54
+  offset: 0, 0
+  index: -1
+piaodai9
+  rotate: false
+  xy: 31, 123
+  size: 27, 27
+  orig: 27, 27
+  offset: 0, 0
+  index: -1
+zix
+  rotate: true
+  xy: 55, 13
+  size: 54, 52
+  orig: 54, 52
+  offset: 0, 0
+  index: -1

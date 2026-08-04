@@ -1,0 +1,27 @@
+
+yanwu.png
+size: 47,25
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+yanwu2
+  rotate: false
+  xy: 28, 8
+  size: 17, 15
+  orig: 17, 15
+  offset: 0, 0
+  index: -1
+yanwu4
+  rotate: false
+  xy: 2, 2
+  size: 24, 21
+  orig: 24, 21
+  offset: 0, 0
+  index: -1
+yanwu3
+  rotate: false
+  xy: 2, 2
+  size: 24, 21
+  orig: 24, 21
+  offset: 0, 0
+  index: -1

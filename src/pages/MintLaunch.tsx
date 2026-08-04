@@ -616,10 +616,6 @@ export default function MintLaunch() {
                 总计 {allocationTotal}%
               </span>
             </div>
-            <div className="mt-3 rounded-xl border-2 border-dashed border-[#F0A568] bg-[#FDEBD7] p-3 text-xs leading-relaxed text-[#6F5035]">
-              平台服务费固定为每笔交易税的 10%，转入平台地址；剩余 90% 按下方基金、回流、奖励和销毁比例分配。
-            </div>
-
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-[#8A7258]">买入税 {buyTax}%</label>

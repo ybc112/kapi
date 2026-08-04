@@ -1,0 +1,48 @@
+
+dingshizhadan_2.png
+size: 140,123
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+baozha2
+  rotate: true
+  xy: 2, 2
+  size: 119, 116
+  orig: 119, 116
+  offset: 0, 0
+  index: -1
+yantuan1
+  rotate: true
+  xy: 120, 65
+  size: 15, 17
+  orig: 15, 17
+  offset: 0, 0
+  index: -1
+yantuan2
+  rotate: false
+  xy: 120, 44
+  size: 9, 8
+  orig: 9, 8
+  offset: 0, 0
+  index: -1
+yantuan3
+  rotate: false
+  xy: 120, 82
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+yantuan4
+  rotate: true
+  xy: 120, 54
+  size: 9, 11
+  orig: 9, 11
+  offset: 0, 0
+  index: -1
+yantuan5
+  rotate: false
+  xy: 120, 100
+  size: 18, 21
+  orig: 18, 21
+  offset: 0, 0
+  index: -1

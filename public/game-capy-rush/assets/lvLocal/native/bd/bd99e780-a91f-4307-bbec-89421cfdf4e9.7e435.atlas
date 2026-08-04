@@ -1,0 +1,48 @@
+
+dingshizhadan_1.png
+size: 107,29
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+heiyan1
+  rotate: true
+  xy: 72, 10
+  size: 17, 20
+  orig: 17, 20
+  offset: 0, 0
+  index: -1
+heiyan2
+  rotate: false
+  xy: 94, 2
+  size: 10, 10
+  orig: 10, 10
+  offset: 0, 0
+  index: -1
+heiyan3
+  rotate: false
+  xy: 49, 8
+  size: 21, 19
+  orig: 21, 19
+  offset: 0, 0
+  index: -1
+heiyan4
+  rotate: false
+  xy: 94, 14
+  size: 11, 13
+  orig: 11, 13
+  offset: 0, 0
+  index: -1
+heiyan5
+  rotate: false
+  xy: 26, 3
+  size: 21, 24
+  orig: 21, 24
+  offset: 0, 0
+  index: -1
+huoxing
+  rotate: false
+  xy: 2, 3
+  size: 22, 24
+  orig: 22, 24
+  offset: 0, 0
+  index: -1

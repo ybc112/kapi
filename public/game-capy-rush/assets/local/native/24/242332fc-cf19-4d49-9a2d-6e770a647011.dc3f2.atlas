@@ -1,0 +1,139 @@
+
+jiesuan.png
+size: 563,523
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+caodi
+  rotate: true
+  xy: 277, 162
+  size: 359, 123
+  orig: 359, 123
+  offset: 0, 0
+  index: -1
+shengliguolan
+  rotate: true
+  xy: 402, 334
+  size: 187, 132
+  orig: 187, 132
+  offset: 0, 0
+  index: -1
+shenglijiao
+  rotate: false
+  xy: 250, 3
+  size: 88, 62
+  orig: 88, 62
+  offset: 0, 0
+  index: -1
+shenglijuzi
+  rotate: false
+  xy: 490, 262
+  size: 71, 70
+  orig: 71, 70
+  offset: 0, 0
+  index: -1
+shenglisaihong
+  rotate: true
+  xy: 536, 396
+  size: 29, 19
+  orig: 29, 19
+  offset: 0, 0
+  index: -1
+shenglishenti
+  rotate: false
+  xy: 2, 11
+  size: 181, 255
+  orig: 181, 255
+  offset: 0, 0
+  index: -1
+shenglishou1
+  rotate: false
+  xy: 185, 191
+  size: 90, 75
+  orig: 90, 75
+  offset: 0, 0
+  index: -1
+shenglishou2
+  rotate: true
+  xy: 490, 170
+  size: 90, 66
+  orig: 90, 66
+  offset: 0, 0
+  index: -1
+shenglishuiguo
+  rotate: true
+  xy: 402, 182
+  size: 150, 86
+  orig: 150, 86
+  offset: 0, 0
+  index: -1
+shengliyan
+  rotate: true
+  xy: 536, 427
+  size: 40, 24
+  orig: 40, 24
+  offset: 0, 0
+  index: -1
+shenglizui
+  rotate: true
+  xy: 340, 2
+  size: 28, 39
+  orig: 28, 39
+  offset: 0, 0
+  index: -1
+shibai
+  rotate: false
+  xy: 2, 268
+  size: 273, 253
+  orig: 273, 253
+  offset: 0, 0
+  index: -1
+shibailei
+  rotate: true
+  xy: 340, 32
+  size: 33, 63
+  orig: 33, 63
+  offset: 0, 0
+  index: -1
+shibaipi
+  rotate: false
+  xy: 273, 67
+  size: 133, 93
+  orig: 133, 93
+  offset: 0, 0
+  index: -1
+shibaiquan
+  rotate: true
+  xy: 185, 8
+  size: 59, 63
+  orig: 59, 63
+  offset: 0, 0
+  index: -1
+shibaishou1
+  rotate: false
+  xy: 480, 82
+  size: 74, 86
+  orig: 74, 86
+  offset: 0, 0
+  index: -1
+shibaishou2
+  rotate: false
+  xy: 185, 69
+  size: 86, 120
+  orig: 86, 120
+  offset: 0, 0
+  index: -1
+shibaitui
+  rotate: true
+  xy: 408, 81
+  size: 99, 70
+  orig: 99, 70
+  offset: 0, 0
+  index: -1
+shibaiyan
+  rotate: true
+  xy: 536, 469
+  size: 52, 21
+  orig: 52, 21
+  offset: 0, 0
+  index: -1

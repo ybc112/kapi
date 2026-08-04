@@ -1,0 +1,97 @@
+
+nandu4.png
+size: 1024,1024
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+4gaung
+  rotate: false
+  xy: 2, 389
+  size: 623, 623
+  orig: 623, 623
+  offset: 0, 0
+  index: -1
+4jiantou
+  rotate: false
+  xy: 2, 2
+  size: 51, 53
+  orig: 51, 53
+  offset: 0, 0
+  index: -1
+4jiantou2
+  rotate: false
+  xy: 2, 2
+  size: 51, 53
+  orig: 51, 53
+  offset: 0, 0
+  index: -1
+4jiantou3
+  rotate: false
+  xy: 833, 923
+  size: 86, 89
+  orig: 86, 89
+  offset: 0, 0
+  index: -1
+4jiantou4
+  rotate: false
+  xy: 730, 788
+  size: 86, 89
+  orig: 86, 89
+  offset: 0, 0
+  index: -1
+4kuang
+  rotate: false
+  xy: 2, 163
+  size: 824, 224
+  orig: 824, 224
+  offset: 0, 0
+  index: -1
+4zi
+  rotate: false
+  xy: 2, 57
+  size: 399, 104
+  orig: 399, 104
+  offset: 0, 0
+  index: -1
+you1
+  rotate: false
+  xy: 627, 879
+  size: 101, 133
+  orig: 101, 133
+  offset: 0, 0
+  index: -1
+you2
+  rotate: true
+  xy: 403, 60
+  size: 101, 133
+  orig: 101, 133
+  offset: 0, 0
+  index: -1
+you3
+  rotate: false
+  xy: 627, 744
+  size: 101, 133
+  orig: 101, 133
+  offset: 0, 0
+  index: -1
+zuo1
+  rotate: false
+  xy: 730, 879
+  size: 101, 133
+  orig: 101, 133
+  offset: 0, 0
+  index: -1
+zuo2
+  rotate: true
+  xy: 538, 60
+  size: 101, 133
+  orig: 101, 133
+  offset: 0, 0
+  index: -1
+zuo3
+  rotate: false
+  xy: 627, 609
+  size: 101, 133
+  orig: 101, 133
+  offset: 0, 0
+  index: -1

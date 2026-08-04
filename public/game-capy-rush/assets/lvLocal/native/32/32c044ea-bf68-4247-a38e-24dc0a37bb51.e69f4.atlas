@@ -1,0 +1,27 @@
+
+shuibo3.png
+size: 225,167
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+zuoxia
+  rotate: false
+  xy: 187, 73
+  size: 22, 17
+  orig: 22, 17
+  offset: 0, 0
+  index: -1
+zuoxia1
+  rotate: true
+  xy: 187, 92
+  size: 73, 36
+  orig: 73, 36
+  offset: 0, 0
+  index: -1
+zuoxia2
+  rotate: false
+  xy: 2, 2
+  size: 183, 163
+  orig: 183, 163
+  offset: 0, 0
+  index: -1

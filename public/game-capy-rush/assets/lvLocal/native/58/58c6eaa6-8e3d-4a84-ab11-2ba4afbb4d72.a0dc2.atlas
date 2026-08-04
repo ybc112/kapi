@@ -1,0 +1,27 @@
+
+shuibo2.png
+size: 239,176
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+youshang
+  rotate: false
+  xy: 182, 74
+  size: 22, 18
+  orig: 22, 18
+  offset: 0, 0
+  index: -1
+youshang2
+  rotate: true
+  xy: 182, 94
+  size: 80, 55
+  orig: 80, 55
+  offset: 0, 0
+  index: -1
+youshang3
+  rotate: false
+  xy: 2, 2
+  size: 178, 172
+  orig: 178, 172
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,13 @@
+
+xiaochu.png
+size: 58,46
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+kapi
+  rotate: false
+  xy: 2, 2
+  size: 54, 42
+  orig: 54, 42
+  offset: 0, 0
+  index: -1
