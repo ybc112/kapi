@@ -62,6 +62,7 @@ export default function Header() {
           <NavLink to="#tickets">游戏生态</NavLink>
           <NavLink to="/mint">Mint发射</NavLink>
           <NavLink to="/mint-launches">Mint已发射</NavLink>
+          <NavLink to="/meme-launch">Meme发射</NavLink>
         </div>
 
         <button

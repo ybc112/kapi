@@ -4,6 +4,7 @@ import Toast from "./components/Toast";
 import Home from "./pages/Home";
 import MintLaunch from "./pages/MintLaunch";
 import MintLaunches from "./pages/MintLaunches";
+import MemeLaunch from "./pages/MemeLaunch";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/mint" element={<MintLaunch />} />
           <Route path="/mint-launches" element={<MintLaunches />} />
+          <Route path="/meme-launch" element={<MemeLaunch />} />
         </Routes>
       </main>
       <Toast />
