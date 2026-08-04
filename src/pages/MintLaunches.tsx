@@ -12,88 +12,19 @@ function formatDate(ts: number) {
   return new Date(ts * 1000).toLocaleString("zh-CN");
 }
 
-const mockProjects: MintLaunchProject[] = [
-  {
-    creator: "0x0000000000000000000000000000000000000001",
-    token: "0x1234567890123456789012345678901234567890",
-    vault: "0x0987654321098765432109876543210987654321",
-    paymentToken: "0x0000000000000000000000000000000000000000",
-    receiver: "0x0000000000000000000000000000000000000001",
-    platformFeeReceiver: "0x0000000000000000000000000000000000000000",
-    platformFeeBps: 0,
-    name: "佛系卡皮巴拉 Demo",
-    symbol: "CAPY",
-    description: "这是演示项目，真实项目请连接钱包后刷新列表。",
-    avatar: "",
-    website: "",
-    telegram: "",
-    xLink: "",
-    totalSupply: "100000",
-    mintCount: "300",
-    mintPrice: "0.01 BNB",
-    mintPriceWei: "10000000000000000",
-    maxMintPerWallet: "0",
-    paymentSymbol: "BNB",
-    mintedCount: "42",
-    publicMintCount: "270",
-    whitelistMintCount: "30",
-    publicMintedCount: "40",
-    whitelistMintedCount: "2",
-    refundDeadline: 0,
-    finalized: false,
-    userMintedCount: "0",
-    refundTokenAmount: "0",
-    refundNeedsApproval: false,
-    userRefundAmount: "",
-    canRefund: false,
-    whitelistRemaining: "0",
-    totalWhitelistAllowance: "0",
-    mintPaymentAllowance: "0",
-    rewardToken: "0x55d398326f99059fF775485246999027B3197955",
-    rewardThreshold: "1",
-    userDividendUnpaid: "0",
-    userDividendUnpaidFormatted: "0",
-    buyTaxBps: 300,
-    sellTaxBps: 300,
-    transferTaxBps: 0,
-    addLiquidityTaxBps: 0,
-    removeLiquidityTaxBps: 0,
-    launchProtectionTaxBps: 0,
-    launchProtectionBlocks: 0,
-    claimWait: 60,
-    fundFeeBps: 4400,
-    lpFeeBps: 1800,
-    dividendFeeBps: 1600,
-    burnFeeBps: 1000,
-    vaultTokenBalance: "0",
-    progress: 14,
-    whitelistEnabled: false,
-    createdAt: Math.floor(Date.now() / 1000) - 3600,
-  },
-];
-
 export default function MintLaunches() {
   const wallet = useWallet();
   const { showToast } = useAppStore();
   const [projects, setProjects] = useState<MintLaunchProject[]>([]);
   const [loading, setLoading] = useState(false);
-  const [usingMock, setUsingMock] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
       const list = await fetchMintLaunchProjects(wallet.account);
-      if (list.length === 0) {
-        setProjects(mockProjects);
-        setUsingMock(true);
-      } else {
-        setProjects(list);
-        setUsingMock(false);
-      }
+      setProjects(list);
     } catch (err) {
       showToast("error", err instanceof Error ? err.message : "加载失败");
-      setProjects(mockProjects);
-      setUsingMock(true);
     } finally {
       setLoading(false);
     }
@@ -137,12 +68,6 @@ export default function MintLaunches() {
           刷新列表
         </button>
       </div>
-
-      {usingMock && (
-        <div className="mb-5 rounded-xl border-2 border-dashed border-[#F0A568] bg-[#FDEBD7] p-3 text-xs font-bold text-[#8A5F38]">
-          当前展示的是演示数据。连接钱包并刷新后将显示真实链上项目。
-        </div>
-      )}
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
