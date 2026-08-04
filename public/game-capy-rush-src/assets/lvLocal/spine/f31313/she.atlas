@@ -1,0 +1,125 @@
+
+she.png
+size: 282,268
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+she_bai
+  rotate: false
+  xy: 54, 43
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+she_cheng
+  rotate: false
+  xy: 71, 164
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+she_fen
+  rotate: false
+  xy: 105, 60
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+she_he
+  rotate: true
+  xy: 106, 9
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+she_hong
+  rotate: false
+  xy: 122, 164
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+she_huang
+  rotate: false
+  xy: 156, 60
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+she_lan
+  rotate: false
+  xy: 173, 164
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+she_lv
+  rotate: false
+  xy: 2, 42
+  size: 50, 103
+  orig: 50, 103
+  offset: 0, 0
+  index: -1
+she_shong
+  rotate: false
+  xy: 207, 60
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+she_zi
+  rotate: false
+  xy: 224, 164
+  size: 49, 102
+  orig: 49, 102
+  offset: 0, 0
+  index: -1
+shehong
+  rotate: false
+  xy: 2, 147
+  size: 67, 119
+  orig: 67, 119
+  offset: 0, 0
+  index: -1
+sheyouyan
+  rotate: false
+  xy: 258, 140
+  size: 22, 22
+  orig: 22, 22
+  offset: 0, 0
+  index: -1
+shezui
+  rotate: true
+  xy: 81, 2
+  size: 39, 23
+  orig: 39, 23
+  offset: 0, 0
+  index: -1
+shezuoyan
+  rotate: false
+  xy: 258, 116
+  size: 22, 22
+  orig: 22, 22
+  offset: 0, 0
+  index: -1
+yun
+  rotate: false
+  xy: 2, 6
+  size: 77, 34
+  orig: 77, 34
+  offset: 0, 0
+  index: -1
+yunyan1
+  rotate: false
+  xy: 71, 147
+  size: 17, 15
+  orig: 17, 15
+  offset: 0, 0
+  index: -1
+yunyan2
+  rotate: false
+  xy: 258, 98
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1

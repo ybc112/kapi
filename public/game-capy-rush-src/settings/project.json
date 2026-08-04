@@ -1,0 +1,13 @@
+{
+  "collision-matrix": [
+    [
+      true
+    ]
+  ],
+  "excluded-modules": [],
+  "group-list": [
+    "default"
+  ],
+  "design-resolution-width": 960,
+  "start-scene": "cee022dc-2f1a-4780-b04a-8d94eee7b37c"
+}

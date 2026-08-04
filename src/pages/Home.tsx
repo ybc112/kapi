@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { Gamepad2 } from "lucide-react";
 import { useAppStore } from "@/store";
 
 const MINT_TIME = new Date("2026-08-04T20:00:00").getTime();
@@ -289,17 +290,17 @@ export default function Home() {
             <div className="ticket reveal" ref={addReveal}>
               <div className="head">
                 <span>场次 01</span>
-                <span>🍉 今日热映</span>
+                <span>🎮 今日热映</span>
               </div>
               <div className="body">
-                <span className="big">🍉</span>
-                <h4 className="hand">吃瓜消消乐</h4>
-                <p>卡皮巴拉最爱的西瓜，消除爽感拉满，通关掉落代币。</p>
+                <span className="big">🦫</span>
+                <h4 className="hand">卡皮巴拉冲冲冲</h4>
+                <p>超解压合成小游戏，随时随地来一局，玩着玩着就把币赚了。</p>
               </div>
               <div className="foot">
                 <span className="stub" />
-                <span>任务产出 🪙</span>
-                <span className="go">即将上映 →</span>
+                <span>已上线 🪙</span>
+                <Link to="/game" className="go">立即开玩 →</Link>
                 <span className="stub r" />
               </div>
             </div>
@@ -339,6 +340,15 @@ export default function Home() {
                 <span className="stub r" />
               </div>
             </div>
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link to="/game">
+              <button className="capy-btn-main px-10 py-4 text-lg">
+                <Gamepad2 className="h-5 w-5" />
+                进入游戏
+              </button>
+            </Link>
           </div>
         </div>
       </section>

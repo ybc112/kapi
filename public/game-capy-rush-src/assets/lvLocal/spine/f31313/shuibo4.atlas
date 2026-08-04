@@ -1,0 +1,27 @@
+
+shuibo4.png
+size: 180,130
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+youxia
+  rotate: false
+  xy: 156, 93
+  size: 16, 14
+  orig: 16, 14
+  offset: 0, 0
+  index: -1
+youxia1
+  rotate: false
+  xy: 156, 109
+  size: 22, 19
+  orig: 22, 19
+  offset: 0, 0
+  index: -1
+youxia2
+  rotate: false
+  xy: 2, 2
+  size: 152, 126
+  orig: 152, 126
+  offset: 0, 0
+  index: -1

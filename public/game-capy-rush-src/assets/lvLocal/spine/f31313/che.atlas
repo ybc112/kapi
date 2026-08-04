@@ -1,0 +1,104 @@
+
+che.png
+size: 330,255
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+che_bai
+  rotate: false
+  xy: 2, 21
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_cheng
+  rotate: false
+  xy: 57, 21
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_fen
+  rotate: false
+  xy: 74, 147
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_he
+  rotate: false
+  xy: 112, 39
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_hong
+  rotate: false
+  xy: 129, 147
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_huang
+  rotate: false
+  xy: 167, 39
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_lan
+  rotate: false
+  xy: 184, 147
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_lv
+  rotate: true
+  xy: 222, 92
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_shong
+  rotate: false
+  xy: 239, 147
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+che_zi
+  rotate: true
+  xy: 222, 37
+  size: 53, 106
+  orig: 53, 106
+  offset: 0, 0
+  index: -1
+chehong
+  rotate: false
+  xy: 2, 129
+  size: 70, 124
+  orig: 70, 124
+  offset: 0, 0
+  index: -1
+yun
+  rotate: false
+  xy: 112, 3
+  size: 77, 34
+  orig: 77, 34
+  offset: 0, 0
+  index: -1
+yunyan1
+  rotate: true
+  xy: 20, 2
+  size: 17, 15
+  orig: 17, 15
+  offset: 0, 0
+  index: -1
+yunyan2
+  rotate: false
+  xy: 2, 3
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1

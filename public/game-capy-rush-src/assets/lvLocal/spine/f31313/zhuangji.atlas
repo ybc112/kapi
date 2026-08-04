@@ -1,0 +1,13 @@
+
+zhuangji.png
+size: 48,40
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+zhuang
+  rotate: false
+  xy: 2, 2
+  size: 44, 36
+  orig: 44, 36
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "763fec74-aa00-40a7-b519-40856efc975a",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 124,
+  "height": 154,
+  "platformSettings": {},
+  "subMetas": {
+    "bg_tanchuang_di1": {
+      "ver": "1.0.6",
+      "uuid": "77fd2ffd-e7cd-4f3a-be46-83ecf8a2dfe9",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "763fec74-aa00-40a7-b519-40856efc975a",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 124,
+      "height": 154,
+      "rawWidth": 124,
+      "rawHeight": 154,
+      "borderTop": 69,
+      "borderBottom": 69,
+      "borderLeft": 55,
+      "borderRight": 55,
+      "subMetas": {}
+    }
+  }
+}

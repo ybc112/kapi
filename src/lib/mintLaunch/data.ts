@@ -56,7 +56,7 @@ export const initialAdvancedTax = {
   claimWaitSeconds: "60",
 };
 
-export const mintCreationFeeLabel = "15000 代币（自动销毁）";
+export const mintCreationFeeLabel = "100,000 代币（自动销毁）";
 
 export const mintTemplates: MintLaunchTemplate[] = [
   {

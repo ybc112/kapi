@@ -1,0 +1,174 @@
+
+long.png
+size: 316,269
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+long_bai
+  rotate: false
+  xy: 2, 43
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_cheng
+  rotate: false
+  xy: 74, 169
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_fen
+  rotate: false
+  xy: 130, 169
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_he
+  rotate: false
+  xy: 186, 169
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_hong
+  rotate: false
+  xy: 242, 169
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_huang
+  rotate: true
+  xy: 74, 113
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_lan
+  rotate: true
+  xy: 174, 113
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_lv
+  rotate: true
+  xy: 58, 57
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_shong
+  rotate: true
+  xy: 158, 57
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+long_zi
+  rotate: false
+  xy: 258, 13
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+longhong
+  rotate: false
+  xy: 2, 143
+  size: 70, 124
+  orig: 70, 124
+  offset: 0, 0
+  index: -1
+longwei_bai
+  rotate: false
+  xy: 2, 8
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_cheng
+  rotate: false
+  xy: 274, 134
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_fen
+  rotate: false
+  xy: 137, 22
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_he
+  rotate: false
+  xy: 21, 8
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_hong
+  rotate: true
+  xy: 40, 2
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_huang
+  rotate: true
+  xy: 75, 2
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_lan
+  rotate: true
+  xy: 110, 2
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_lv
+  rotate: false
+  xy: 156, 22
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_shong
+  rotate: false
+  xy: 175, 22
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+longwei_zi
+  rotate: false
+  xy: 194, 22
+  size: 17, 33
+  orig: 17, 33
+  offset: 0, 0
+  index: -1
+yun
+  rotate: false
+  xy: 58, 21
+  size: 77, 34
+  orig: 77, 34
+  offset: 0, 0
+  index: -1
+yunyan1
+  rotate: false
+  xy: 274, 117
+  size: 17, 15
+  orig: 17, 15
+  offset: 0, 0
+  index: -1
+yunyan2
+  rotate: false
+  xy: 298, 251
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1

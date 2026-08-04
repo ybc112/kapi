@@ -1,0 +1,13 @@
+
+shuibo.png
+size: 34,21
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+shuiobo1
+  rotate: false
+  xy: 2, 2
+  size: 30, 17
+  orig: 30, 17
+  offset: 0, 0
+  index: -1

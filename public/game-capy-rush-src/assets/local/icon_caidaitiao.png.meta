@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "57eea4ec-a40f-4e7f-83c5-189d699fd217",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 90,
+  "height": 93,
+  "platformSettings": {},
+  "subMetas": {
+    "icon_caidaitiao": {
+      "ver": "1.0.6",
+      "uuid": "5f7555c0-8dd0-4c5a-b3f4-2e6d7e1ec90b",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "57eea4ec-a40f-4e7f-83c5-189d699fd217",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 90,
+      "height": 93,
+      "rawWidth": 90,
+      "rawHeight": 93,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

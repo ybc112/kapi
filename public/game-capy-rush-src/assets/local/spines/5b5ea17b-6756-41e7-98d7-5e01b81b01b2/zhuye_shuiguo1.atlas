@@ -1,0 +1,27 @@
+
+zhuye_shuiguo1.png
+size: 216,167
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+ningmeng
+  rotate: false
+  xy: 74, 73
+  size: 108, 92
+  orig: 108, 92
+  offset: 0, 0
+  index: -1
+shui4
+  rotate: false
+  xy: 74, 7
+  size: 140, 64
+  orig: 140, 64
+  offset: 0, 0
+  index: -1
+shuibo4
+  rotate: true
+  xy: 2, 2
+  size: 163, 70
+  orig: 163, 70
+  offset: 0, 0
+  index: -1

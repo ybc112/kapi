@@ -1,0 +1,174 @@
+
+yang.png
+size: 316,263
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+yang_bai
+  rotate: false
+  xy: 2, 38
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_cheng
+  rotate: false
+  xy: 76, 163
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_fen
+  rotate: false
+  xy: 132, 163
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_he
+  rotate: false
+  xy: 188, 163
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_hong
+  rotate: false
+  xy: 244, 163
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_huang
+  rotate: true
+  xy: 76, 107
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_lan
+  rotate: true
+  xy: 176, 107
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_lv
+  rotate: true
+  xy: 58, 51
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_shong
+  rotate: true
+  xy: 158, 51
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yang_zi
+  rotate: false
+  xy: 258, 7
+  size: 54, 98
+  orig: 54, 98
+  offset: 0, 0
+  index: -1
+yanghong
+  rotate: false
+  xy: 2, 138
+  size: 72, 123
+  orig: 72, 123
+  offset: 0, 0
+  index: -1
+yangwei_bai
+  rotate: false
+  xy: 276, 143
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_cheng
+  rotate: false
+  xy: 276, 123
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_fen
+  rotate: false
+  xy: 81, 31
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_he
+  rotate: false
+  xy: 81, 11
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_hong
+  rotate: false
+  xy: 102, 31
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_huang
+  rotate: false
+  xy: 102, 11
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_lan
+  rotate: false
+  xy: 123, 31
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_lv
+  rotate: false
+  xy: 123, 11
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_shong
+  rotate: false
+  xy: 144, 31
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yangwei_zi
+  rotate: false
+  xy: 144, 11
+  size: 19, 18
+  orig: 19, 18
+  offset: 0, 0
+  index: -1
+yun
+  rotate: false
+  xy: 2, 2
+  size: 77, 34
+  orig: 77, 34
+  offset: 0, 0
+  index: -1
+yunyan1
+  rotate: false
+  xy: 297, 146
+  size: 17, 15
+  orig: 17, 15
+  offset: 0, 0
+  index: -1
+yunyan2
+  rotate: false
+  xy: 58, 120
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,174 @@
+
+xiong.png
+size: 294,269
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+xiong_bai
+  rotate: false
+  xy: 2, 38
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_cheng
+  rotate: false
+  xy: 74, 164
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_fen
+  rotate: false
+  xy: 129, 164
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_he
+  rotate: false
+  xy: 184, 164
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_hong
+  rotate: false
+  xy: 239, 164
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_huang
+  rotate: false
+  xy: 57, 38
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_lan
+  rotate: false
+  xy: 112, 59
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_lv
+  rotate: false
+  xy: 167, 59
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_shong
+  rotate: false
+  xy: 222, 59
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xiong_zi
+  rotate: true
+  xy: 112, 4
+  size: 53, 103
+  orig: 53, 103
+  offset: 0, 0
+  index: -1
+xionghong
+  rotate: false
+  xy: 2, 143
+  size: 70, 124
+  orig: 70, 124
+  offset: 0, 0
+  index: -1
+xiongwei_bai
+  rotate: false
+  xy: 92, 146
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+xiongwei_cheng
+  rotate: false
+  xy: 81, 20
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+xiongwei_fen
+  rotate: false
+  xy: 81, 2
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+xiongwei_he
+  rotate: true
+  xy: 74, 143
+  size: 19, 16
+  orig: 19, 16
+  offset: 0, 0
+  index: -1
+xiongwei_hong
+  rotate: false
+  xy: 217, 41
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+xiongwei_huang
+  rotate: false
+  xy: 217, 23
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+xiongwei_lan
+  rotate: false
+  xy: 237, 41
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+xiongwei_lv
+  rotate: false
+  xy: 217, 5
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+xiongwei_shong
+  rotate: false
+  xy: 237, 23
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+xiongwei_zi
+  rotate: false
+  xy: 257, 41
+  size: 18, 16
+  orig: 18, 16
+  offset: 0, 0
+  index: -1
+yun
+  rotate: false
+  xy: 2, 2
+  size: 77, 34
+  orig: 77, 34
+  offset: 0, 0
+  index: -1
+yunyan1
+  rotate: true
+  xy: 277, 145
+  size: 17, 15
+  orig: 17, 15
+  offset: 0, 0
+  index: -1
+yunyan2
+  rotate: false
+  xy: 237, 5
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1

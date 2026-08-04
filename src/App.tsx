@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import MintLaunch from "./pages/MintLaunch";
 import MintLaunches from "./pages/MintLaunches";
 import MemeLaunch from "./pages/MemeLaunch";
+import Game from "./pages/Game";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/mint" element={<MintLaunch />} />
           <Route path="/mint-launches" element={<MintLaunches />} />
           <Route path="/meme-launch" element={<MemeLaunch />} />
+          <Route path="/game" element={<Game />} />
         </Routes>
       </main>
       <Toast />
