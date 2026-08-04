@@ -1,0 +1,237 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Copy, ExternalLink, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useWallet } from "@/hooks/useWallet";
+import { useAppStore } from "@/store";
+import { fetchMintLaunchProjects } from "@/lib/mintLaunch/launchpad";
+import type { MintLaunchProject } from "@/lib/mintLaunch/types";
+
+function formatDate(ts: number) {
+  if (!ts) return "未知";
+  return new Date(ts * 1000).toLocaleString("zh-CN");
+}
+
+const mockProjects: MintLaunchProject[] = [
+  {
+    creator: "0x0000000000000000000000000000000000000001",
+    token: "0x1234567890123456789012345678901234567890",
+    vault: "0x0987654321098765432109876543210987654321",
+    paymentToken: "0x0000000000000000000000000000000000000000",
+    receiver: "0x0000000000000000000000000000000000000001",
+    platformFeeReceiver: "0x0000000000000000000000000000000000000000",
+    platformFeeBps: 0,
+    name: "佛系卡皮巴拉 Demo",
+    symbol: "CAPY",
+    description: "这是演示项目，真实项目请连接钱包后刷新列表。",
+    avatar: "",
+    website: "",
+    telegram: "",
+    xLink: "",
+    totalSupply: "100000",
+    mintCount: "300",
+    mintPrice: "0.01 BNB",
+    mintPriceWei: "10000000000000000",
+    maxMintPerWallet: "0",
+    paymentSymbol: "BNB",
+    mintedCount: "42",
+    publicMintCount: "270",
+    whitelistMintCount: "30",
+    publicMintedCount: "40",
+    whitelistMintedCount: "2",
+    refundDeadline: 0,
+    finalized: false,
+    userMintedCount: "0",
+    refundTokenAmount: "0",
+    refundNeedsApproval: false,
+    userRefundAmount: "",
+    canRefund: false,
+    whitelistRemaining: "0",
+    totalWhitelistAllowance: "0",
+    mintPaymentAllowance: "0",
+    rewardToken: "0x55d398326f99059fF775485246999027B3197955",
+    rewardThreshold: "1",
+    userDividendUnpaid: "0",
+    userDividendUnpaidFormatted: "0",
+    buyTaxBps: 300,
+    sellTaxBps: 300,
+    transferTaxBps: 0,
+    addLiquidityTaxBps: 0,
+    removeLiquidityTaxBps: 0,
+    launchProtectionTaxBps: 0,
+    launchProtectionBlocks: 0,
+    claimWait: 60,
+    fundFeeBps: 4400,
+    lpFeeBps: 1800,
+    dividendFeeBps: 1600,
+    burnFeeBps: 1000,
+    vaultTokenBalance: "0",
+    progress: 14,
+    whitelistEnabled: false,
+    createdAt: Math.floor(Date.now() / 1000) - 3600,
+  },
+];
+
+export default function MintLaunches() {
+  const wallet = useWallet();
+  const { showToast } = useAppStore();
+  const [projects, setProjects] = useState<MintLaunchProject[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [usingMock, setUsingMock] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const list = await fetchMintLaunchProjects(wallet.account);
+      if (list.length === 0) {
+        setProjects(mockProjects);
+        setUsingMock(true);
+      } else {
+        setProjects(list);
+        setUsingMock(false);
+      }
+    } catch (err) {
+      showToast("error", err instanceof Error ? err.message : "加载失败");
+      setProjects(mockProjects);
+      setUsingMock(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.account]);
+
+  const copy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("success", `已复制 ${label}`);
+    } catch {
+      showToast("error", "复制失败");
+    }
+  };
+
+  return (
+    <div className="page-fade-in mx-auto max-w-6xl px-4 py-8">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-dashed border-[#DFC9A4] bg-white text-[#8A5F38] transition hover:bg-[#F5E7C2]"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <h1 className="hand text-2xl font-black text-[#8A5F38] lg:text-3xl">Mint 已发射</h1>
+            <p className="text-xs text-[#8A7258]">链上已部署的佛系卡皮巴拉生态 Mint 项目</p>
+          </div>
+        </div>
+        <button
+          onClick={load}
+          disabled={loading}
+          className="capy-btn-main"
+        >
+          <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+          刷新列表
+        </button>
+      </div>
+
+      {usingMock && (
+        <div className="mb-5 rounded-xl border-2 border-dashed border-[#F0A568] bg-[#FDEBD7] p-3 text-xs font-bold text-[#8A5F38]">
+          当前展示的是演示数据。连接钱包并刷新后将显示真实链上项目。
+        </div>
+      )}
+
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {projects.map((project) => (
+          <div key={project.token} className="capy-card relative flex flex-col gap-3">
+            <span className="tape tl" />
+            <div className="flex items-start gap-3">
+              {project.avatar ? (
+                <img src={project.avatar} alt={project.name} className="h-14 w-14 rounded-xl object-cover ring-2 ring-[#EAD9B8]" />
+              ) : (
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#F5E7C2] to-[#FDEBD7] text-xl font-black text-[#8A5F38] ring-2 ring-[#EAD9B8]">
+                  {project.symbol.slice(0, 2) || "🦫"}
+                </div>
+              )}
+              <div className="flex-1">
+                <h3 className="font-bold text-[#4A3524]">{project.name}</h3>
+                <p className="text-xs font-bold text-[#8A7258]">
+                  {project.symbol} · {project.paymentSymbol}
+                </p>
+              </div>
+            </div>
+
+            <p className="line-clamp-2 text-sm text-[#8A7258]">{project.description}</p>
+
+            <div className="space-y-1 text-xs text-[#8A7258]">
+              <div className="flex justify-between">
+                <span>进度</span>
+                <span className="font-bold text-[#4A3524]">{project.progress.toFixed(2)}%</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[#F5E7C2]">
+                <div
+                  className="h-full rounded-full bg-[#F0A568]"
+                  style={{ width: `${Math.min(100, project.progress)}%` }}
+                />
+              </div>
+              <div className="flex justify-between">
+                <span>已 Mint</span>
+                <span className="text-[#4A3524]">
+                  {project.mintedCount} / {project.mintCount}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>单价</span>
+                <span className="text-[#4A3524]">{project.mintPrice}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>发射时间</span>
+                <span className="text-[#4A3524]">{formatDate(project.createdAt)}</span>
+              </div>
+            </div>
+
+            <div className="mt-auto flex flex-wrap gap-2 pt-2">
+              <button
+                onClick={() => copy(project.token, "代币地址")}
+                className="inline-flex items-center gap-1 rounded-lg border border-dashed border-[#DFC9A4] bg-[#FFFDF6] px-2.5 py-1 text-xs font-bold text-[#8A5F38] hover:bg-[#F5E7C2]"
+              >
+                <Copy className="h-3 w-3" />
+                代币
+              </button>
+              <button
+                onClick={() => copy(project.vault, "Vault 地址")}
+                className="inline-flex items-center gap-1 rounded-lg border border-dashed border-[#DFC9A4] bg-[#FFFDF6] px-2.5 py-1 text-xs font-bold text-[#8A5F38] hover:bg-[#F5E7C2]"
+              >
+                <Copy className="h-3 w-3" />
+                Vault
+              </button>
+              <a
+                href={`https://bscscan.com/token/${project.token}`}
+                target="_blank"
+                rel="noreferrer"
+                className="ml-auto inline-flex items-center gap-1 rounded-lg border border-dashed border-[#8A5F38] bg-[#F5E7C2] px-2.5 py-1 text-xs font-bold text-[#8A5F38] hover:bg-[#FDEBD7]"
+              >
+                <ExternalLink className="h-3 w-3" />
+                BscScan
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {projects.length === 0 && !loading && (
+        <div className="mt-10 rounded-3xl border-2 border-dashed border-[#EAD9B8] bg-[#FFFDF6] p-10 text-center">
+          <div className="mb-3 text-4xl">🦫</div>
+          <h3 className="text-lg font-bold text-[#4A3524]">暂无已发射项目</h3>
+          <p className="text-sm text-[#8A7258]">去 Mint 发射台创建第一个佛系卡皮巴拉生态资产吧。</p>
+          <Link to="/mint" className="capy-btn-main mt-4 inline-flex">
+            去发射
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
