@@ -305,13 +305,6 @@ export default function MintLaunch() {
       <section className="capy-card relative mb-6 overflow-hidden">
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center">
           <div className="flex items-start gap-4 lg:flex-1">
-            <div className="relative">
-              <img
-                src="/logo.jpg"
-                alt="佛系卡皮巴拉"
-                className="relative h-16 w-16 rounded-2xl object-cover ring-2 ring-[#F0A568]"
-              />
-            </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="hand text-2xl font-black tracking-tight text-[#8A5F38] lg:text-4xl">
