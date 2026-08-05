@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Copy, ExternalLink, RefreshCw } from "lucide-react";
+import { ArrowLeft, Copy, ExternalLink, RefreshCw, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWallet } from "@/hooks/useWallet";
 import { useAppStore } from "@/store";
@@ -10,6 +10,10 @@ import type { MintLaunchProject } from "@/lib/mintLaunch/types";
 function formatDate(ts: number) {
   if (!ts) return "未知";
   return new Date(ts * 1000).toLocaleString("zh-CN");
+}
+
+function shortAddress(address: string) {
+  return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
 }
 
 export default function MintLaunches() {
@@ -118,6 +122,26 @@ export default function MintLaunches() {
               </div>
             </div>
 
+            <div className="rounded-xl border-2 border-dashed border-[#DFC9A4] bg-[#FFFDF6] p-2.5">
+              <div className="mb-1 text-[10px] text-[#B0A08A]">代币合约</div>
+              <div className="flex items-center justify-between gap-2">
+                <a
+                  href={`https://bscscan.com/token/${project.token}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-mono text-xs text-[#8A5F38] hover:underline"
+                >
+                  {shortAddress(project.token)}
+                </a>
+                <button
+                  onClick={() => copy(project.token, "代币地址")}
+                  className="rounded-md border border-dashed border-[#DFC9A4] bg-white p-1 text-[#8A5F38] hover:bg-[#F5E7C2]"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+
             <div className="mt-auto flex flex-wrap gap-2 pt-2">
               <button
                 onClick={() => copy(project.token, "代币地址")}
@@ -142,6 +166,13 @@ export default function MintLaunches() {
                 <ExternalLink className="h-3 w-3" />
                 BscScan
               </a>
+              <Link
+                to={`/mint-project/${project.token}`}
+                className="inline-flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-[#8A5F38] bg-[#8A5F38] px-2.5 py-1.5 text-xs font-bold text-[#FFFDF6] transition hover:bg-[#6F5035]"
+              >
+                查看详情 / Mint / 白名单
+                <ArrowRight className="h-3 w-3" />
+              </Link>
             </div>
           </div>
         ))}
