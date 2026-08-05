@@ -6,6 +6,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { useAppStore } from "@/store";
 import { fetchMintLaunchProjects } from "@/lib/mintLaunch/launchpad";
 import type { MintLaunchProject } from "@/lib/mintLaunch/types";
+import { TokenAvatar } from "@/components/TokenAvatar";
 
 function formatDate(ts: number) {
   if (!ts) return "未知";
@@ -78,13 +79,12 @@ export default function MintLaunches() {
           <div key={project.token} className="capy-card relative flex flex-col gap-3">
             <span className="tape tl" />
             <div className="flex items-start gap-3">
-              {project.avatar ? (
-                <img src={project.avatar} alt={project.name} className="h-14 w-14 rounded-xl object-cover ring-2 ring-[#EAD9B8]" />
-              ) : (
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#F5E7C2] to-[#FDEBD7] text-xl font-black text-[#8A5F38] ring-2 ring-[#EAD9B8]">
-                  {project.symbol.slice(0, 2) || "🦫"}
-                </div>
-              )}
+              <TokenAvatar
+                src={project.avatar}
+                symbol={project.symbol}
+                token={project.token}
+                size={56}
+              />
               <div className="flex-1">
                 <h3 className="font-bold text-[#4A3524]">{project.name}</h3>
                 <p className="text-xs font-bold text-[#8A7258]">

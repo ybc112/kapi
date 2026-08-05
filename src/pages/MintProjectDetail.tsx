@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -22,6 +22,7 @@ import type { MintLaunchProject } from "@/lib/mintLaunch/types";
 import { useWallet } from "@/hooks/useWallet";
 import { useAppStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { TokenAvatar } from "@/components/TokenAvatar";
 
 function shortAddress(address: string) {
   return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
@@ -219,17 +220,13 @@ export default function MintProjectDetail() {
         <span className="tape tl" />
         <span className="tape br" />
         <div className="flex items-start gap-4">
-          {project.avatar ? (
-            <img
-              src={project.avatar}
-              alt={project.name}
-              className="h-16 w-16 rounded-2xl object-cover ring-2 ring-[#EAD9B8]"
-            />
-          ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F5E7C2] to-[#FDEBD7] text-xl font-black text-[#8A5F38]">
-              {project.symbol.slice(0, 2) || "🦫"}
-            </div>
-          )}
+          <TokenAvatar
+            src={project.avatar}
+            symbol={project.symbol}
+            token={project.token}
+            size={64}
+            className="rounded-2xl"
+          />
           <div className="min-w-0 flex-1">
             <h1 className="hand text-2xl font-black text-[#4A3524]">{project.name}</h1>
             <p className="text-sm text-[#8A7258]">
