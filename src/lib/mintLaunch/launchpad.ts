@@ -30,14 +30,14 @@ const DEFAULT_APP_BACKEND_URL = "https://api.kimi-vault.com/kapi";
 const configuredBackendUrl =
   String(import.meta.env.VITE_MINT_BACKEND_URL ?? "").trim() || DEFAULT_APP_BACKEND_URL;
 
-export const DEFAULT_MINT_FACTORY_ADDRESS = "0xB9DD0382055B52b914c0F91838b11bb77E254146";
+export const DEFAULT_MINT_FACTORY_ADDRESS = "0x6c3f15a06ca01dE33A1F1C38017D021e7A55BcE8";
 const RETIRED_MINT_FACTORY_ADDRESSES = new Set([
   "0x084c85f7cf1d9cf3d638ef75b1561e464884dfbc",
 ]);
 export const DEFAULT_MINT_FEE_RECIPIENT = "0x436fB3245Ad8377DF443Ca1c67f997705D5843bb";
 const DEFAULT_CREATION_FEE_BNB = "0";
 export const MINT_CREATION_FEE_TOKEN = "0x839578f40b9a79a3fe891dd96079f3083e6e7777";
-export const MINT_CREATION_FEE_AMOUNT = parseUnits("100000", 18);
+export const MINT_CREATION_FEE_AMOUNT = parseUnits("35000", 18);
 
 function resolveMintFactoryAddress(value: string): string {
   const configured = value.trim();
@@ -276,7 +276,7 @@ export async function createMintLaunchToken(
       token.allowance(from, mintLaunchpadConfig.factoryAddress) as Promise<bigint>,
     ]);
     if (balance < MINT_CREATION_FEE_AMOUNT) {
-      throw new Error("创建需要先持有至少 100,000 枚指定代币，支付后将自动销毁。");
+      throw new Error("创建需要先持有至少 35,000 枚指定代币，支付后将自动销毁。");
     }
     if (allowance < MINT_CREATION_FEE_AMOUNT) {
       const approval = await token.approve(mintLaunchpadConfig.factoryAddress, MINT_CREATION_FEE_AMOUNT);
