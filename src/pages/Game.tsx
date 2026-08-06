@@ -1,4 +1,5 @@
 ﻿import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   Gamepad2,
   Loader2,
@@ -233,6 +234,92 @@ export default function Game() {
     }
   };
 
+  if (started) {
+    return createPortal(
+      <div className="fixed inset-0 z-[9999] flex h-screen w-screen flex-col bg-[#F7F1E2]">
+        <div className="hidden sm:flex flex-none items-center justify-between gap-2 bg-[#FFFDF6]/90 px-3 py-2 shadow-sm">
+          {PAYMENT_ENABLED ? (
+            <div className="flex items-center gap-2">
+              <button onClick={handlePayLevel} disabled={txPending !== null} className="capy-btn-main text-xs px-2 py-1.5">
+                <Coins className="h-3 w-3" />
+                {txPending || `支付第 ${currentLevel} 关`}
+              </button>
+              <button onClick={handleUseItem} disabled={txPending !== null} className="capy-btn-ghost text-xs px-2 py-1.5">
+                <Flame className="h-3 w-3" />
+                道具 {formatGameAmount(itemFee)}
+              </button>
+              {winStreak >= levelsForReward && (
+                <button onClick={handleClaimReward} disabled={txPending !== null} className="capy-btn-main text-xs px-2 py-1.5">
+                  <Trophy className="h-3 w-3" />
+                  领奖
+                </button>
+              )}
+            </div>
+          ) : (
+            <div />
+          )}
+          <button onClick={() => setStarted(false)} className="capy-btn-ghost text-xs px-2 py-1.5">
+            <RotateCcw className="h-3 w-3" />
+            返回
+          </button>
+        </div>
+
+        <button
+          onClick={() => setStarted(false)}
+          className="capy-btn-ghost absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#FFFDF6]/90 p-0 shadow-sm sm:hidden"
+          aria-label="返回"
+        >
+          <RotateCcw className="h-4 w-4" />
+        </button>
+
+        <div className="relative flex-1 overflow-hidden">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-[#8A5F38]">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="text-sm">游戏加载中…</span>
+            </div>
+          )}
+          <iframe
+            ref={iframeRef}
+            src={GAME_SRC}
+            title="卡皮巴拉冲冲冲"
+            className={cn("h-full w-full border-0", (loading || iframeError) && "hidden")}
+            allow="fullscreen"
+            scrolling="yes"
+            onLoad={() => setLoading(false)}
+            onError={() => {
+              setLoading(false);
+              setIframeError(true);
+            }}
+          />
+          {iframeError && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 p-6 text-center">
+              <AlertCircle className="h-10 w-10 text-[#B53E2A]" />
+              <div>
+                <p className="font-bold text-[#B53E2A]">游戏资源尚未构建</p>
+                <p className="mt-2 max-w-md text-sm text-[#8A7258]">
+                  当前还没有可运行的 Web 构建产物。请使用 Cocos Creator 打开项目源码
+                  <code className="mx-1 rounded bg-[#FFFDF6] px-1 py-0.5 text-xs text-[#4A3524]">
+                    public/game-capy-rush-src
+                  </code>
+                  ，构建为 Web Mobile，然后把产物放到
+                  <code className="mx-1 rounded bg-[#FFFDF6] px-1 py-0.5 text-xs text-[#4A3524]">
+                    public/game-capy-rush/
+                  </code>
+                  目录下。
+                </p>
+              </div>
+              <button onClick={() => setStarted(false)} className="capy-btn-ghost">
+                返回游戏封面
+              </button>
+            </div>
+          )}
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
   return (
     <div className="page-fade-in mx-auto min-h-screen max-w-5xl px-4 py-6">
       <div className="mb-4 flex items-center justify-between">
@@ -329,115 +416,37 @@ export default function Game() {
         </div>
       )}
 
-      {!started ? (
-        <div className="capy-section flex flex-col items-center px-4 py-12 text-center sm:py-16">
-          <div className="relative mb-6">
-            <div className="absolute inset-0 rounded-full bg-[#F0A568]/20 blur-3xl" />
-            <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-[#F5E7C2] to-[#FDEBD7] text-5xl shadow-2xl shadow-[#8A5F38]/20 ring-2 ring-[#F0A568]/30 sm:h-32 sm:w-32 lg:h-40 lg:w-40">
-              🦫
-            </div>
-            <span className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#F0A568] text-[#FFFDF6]">
-              <Gamepad2 className="h-4 w-4" />
-            </span>
+      <div className="capy-section flex flex-col items-center px-4 py-12 text-center sm:py-16">
+        <div className="relative mb-6">
+          <div className="absolute inset-0 rounded-full bg-[#F0A568]/20 blur-3xl" />
+          <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-[#F5E7C2] to-[#FDEBD7] text-5xl shadow-2xl shadow-[#8A5F38]/20 ring-2 ring-[#F0A568]/30 sm:h-32 sm:w-32 lg:h-40 lg:w-40">
+            🦫
           </div>
-          <h2 className="hand mb-2 text-2xl font-black text-[#8A5F38] sm:text-3xl">准备好了吗？</h2>
-          <p className="mb-6 max-w-md px-2 text-sm text-[#8A7258]">
-            {PAYMENT_ENABLED
-              ? `连接钱包并支付 ${formatGameAmount(levelFee)} ${tokenSymbol} 即可开始第 ${currentLevel} 关。连胜 ${levelsForReward} 关可领取 ${formatGameAmount(winReward)} ${tokenSymbol} 大奖！`
-              : "点击开始，随时随地来一局超解压合成小游戏！"}
-          </p>
-          <button
-            onClick={handleStart}
-            disabled={txPending !== null}
-            className="capy-btn-main px-8 py-4 text-base sm:px-10 sm:py-4 sm:text-lg"
-          >
-            {txPending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : PAYMENT_ENABLED ? (
-              <Coins className="h-5 w-5" />
-            ) : (
-              <Gamepad2 className="h-5 w-5" />
-            )}
-            {txPending || (PAYMENT_ENABLED ? `支付 ${formatGameAmount(levelFee)} CAPY 开始游戏` : "开始游戏")}
-          </button>
+          <span className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#F0A568] text-[#FFFDF6]">
+            <Gamepad2 className="h-4 w-4" />
+          </span>
         </div>
-      ) : (
-        <div className="capy-section p-1.5 sm:p-4">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            {PAYMENT_ENABLED ? (
-              <div className="flex items-center gap-2">
-                <button onClick={handlePayLevel} disabled={txPending !== null} className="capy-btn-main text-sm">
-                  <Coins className="h-4 w-4" />
-                  {txPending || `支付第 ${currentLevel} 关`}
-                </button>
-                <button onClick={handleUseItem} disabled={txPending !== null} className="capy-btn-ghost text-sm">
-                  <Flame className="h-4 w-4" />
-                  道具 {formatGameAmount(itemFee)}
-                </button>
-              </div>
-            ) : (
-              <div />
-            )}
-            <div className="flex items-center gap-2">
-              {PAYMENT_ENABLED && winStreak >= levelsForReward && (
-                <button onClick={handleClaimReward} disabled={txPending !== null} className="capy-btn-main text-sm">
-                  <Trophy className="h-4 w-4" />
-                  领奖 {formatGameAmount(winReward)}
-                </button>
-              )}
-              <button onClick={() => setStarted(false)} className="capy-btn-ghost text-sm">
-                <RotateCcw className="h-4 w-4" />
-                返回
-              </button>
-            </div>
-          </div>
-
-          <div className="relative w-full overflow-hidden rounded-2xl bg-[#F7F1E2]" style={{ minHeight: "60vh", height: "auto" }}>
-            {loading && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-[#8A5F38]">
-                <Loader2 className="h-8 w-8 animate-spin" />
-                <span className="text-sm">游戏加载中…</span>
-              </div>
-            )}
-            <iframe
-              ref={iframeRef}
-              src={GAME_SRC}
-              title="卡皮巴拉冲冲冲"
-              className={cn("h-full w-full border-0", (loading || iframeError) && "hidden")}
-              style={{ minHeight: "60vh", height: "auto" }}
-              allow="fullscreen"
-              scrolling="yes"
-              onLoad={() => setLoading(false)}
-              onError={() => {
-                setLoading(false);
-                setIframeError(true);
-              }}
-            />
-            {iframeError && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 p-6 text-center">
-                <AlertCircle className="h-10 w-10 text-[#B53E2A]" />
-                <div>
-                  <p className="font-bold text-[#B53E2A]">游戏资源尚未构建</p>
-                  <p className="mt-2 max-w-md text-sm text-[#8A7258]">
-                    当前还没有可运行的 Web 构建产物。请使用 Cocos Creator 打开项目源码
-                    <code className="mx-1 rounded bg-[#FFFDF6] px-1 py-0.5 text-xs text-[#4A3524]">
-                      public/game-capy-rush-src
-                    </code>
-                    ，构建为 Web Mobile，然后把产物放到
-                    <code className="mx-1 rounded bg-[#FFFDF6] px-1 py-0.5 text-xs text-[#4A3524]">
-                      public/game-capy-rush/
-                    </code>
-                    目录下。
-                  </p>
-                </div>
-                <button onClick={() => setStarted(false)} className="capy-btn-ghost">
-                  返回游戏封面
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+        <h2 className="hand mb-2 text-2xl font-black text-[#8A5F38] sm:text-3xl">准备好了吗？</h2>
+        <p className="mb-6 max-w-md px-2 text-sm text-[#8A7258]">
+          {PAYMENT_ENABLED
+            ? `连接钱包并支付 ${formatGameAmount(levelFee)} ${tokenSymbol} 即可开始第 ${currentLevel} 关。连胜 ${levelsForReward} 关可领取 ${formatGameAmount(winReward)} ${tokenSymbol} 大奖！`
+            : "点击开始，随时随地来一局超解压合成小游戏！"}
+        </p>
+        <button
+          onClick={handleStart}
+          disabled={txPending !== null}
+          className="capy-btn-main px-8 py-4 text-base sm:px-10 sm:py-4 sm:text-lg"
+        >
+          {txPending ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : PAYMENT_ENABLED ? (
+            <Coins className="h-5 w-5" />
+          ) : (
+            <Gamepad2 className="h-5 w-5" />
+          )}
+          {txPending || (PAYMENT_ENABLED ? `支付 ${formatGameAmount(levelFee)} CAPY 开始游戏` : "开始游戏")}
+        </button>
+      </div>
     </div>
   );
 }
