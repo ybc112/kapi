@@ -50,6 +50,39 @@
 
 <script src="src/settings.9bea0.js" charset="utf-8"></script>
 
+<!-- MyAdCtl fallback stub for web/H5 builds where the ad module is excluded -->
+<script>
+(function () {
+  var myAdCtlExports = null;
+  function getMyAdCtl() {
+    if (!myAdCtlExports) {
+      myAdCtlExports = {
+        MyAdCtl: {
+          playVideo: function (cb) {
+            window.level_gamePause = true;
+            if (typeof cb === "function") cb(0);
+          },
+          showInsertAd: function (cb) {
+            if (typeof cb === "function") cb();
+          },
+          destroyInsertAd: function () {},
+          showBanner: function () {},
+          hideBanner: function () {}
+        }
+      };
+    }
+    return myAdCtlExports;
+  }
+  var prevRequire = typeof window.__require === "function" ? window.__require : null;
+  window.__require = function (name, direct) {
+    if (name === "MyAdCtl" || name === "./MyAdCtl") {
+      return getMyAdCtl();
+    }
+    if (prevRequire) return prevRequire(name, direct);
+    throw new Error("Cannot find module '" + name + "'");
+  };
+})();
+</script>
 <script src="main.4cb20.js" charset="utf-8"></script>
 
 <script type="text/javascript">

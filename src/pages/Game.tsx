@@ -1,15 +1,85 @@
-﻿import { useEffect, useRef, useState } from "react";
-import { Gamepad2, Loader2, AlertCircle, Play, Home } from "lucide-react";
+﻿import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  Gamepad2,
+  Loader2,
+  AlertCircle,
+  Home,
+  Wallet,
+  Coins,
+  Flame,
+  Trophy,
+  RotateCcw,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useWallet } from "@/hooks/useWallet";
+import {
+  GAME_VAULT_ADDRESS,
+  LEVEL_FEE_UNITS,
+  ITEM_FEE_UNITS,
+  WIN_REWARD_UNITS,
+  LEVELS_FOR_REWARD,
+  formatGameAmount,
+  parseGameAmount,
+  getTokenBalance,
+  getTokenAllowance,
+  approveToken,
+  payLevel,
+  useItem,
+  claimReward,
+  fetchVaultFees,
+} from "@/lib/contracts/gameVault";
 
 const GAME_SRC = "/game-capy-rush/index.html";
+const SIGNATURE_BACKEND = String(import.meta.env.VITE_GAME_SIGNER_URL ?? "").trim();
 
 export default function Game() {
   const navigate = useNavigate();
+  const wallet = useWallet();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loading, setLoading] = useState(true);
   const [started, setStarted] = useState(false);
   const [iframeError, setIframeError] = useState(false);
+
+  const [balance, setBalance] = useState<bigint>(0n);
+  const [levelFee, setLevelFee] = useState<bigint>(parseGameAmount(LEVEL_FEE_UNITS));
+  const [itemFee, setItemFee] = useState<bigint>(parseGameAmount(ITEM_FEE_UNITS));
+  const [winReward, setWinReward] = useState<bigint>(parseGameAmount(WIN_REWARD_UNITS));
+  const [levelsForReward] = useState<number>(LEVELS_FOR_REWARD);
+
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [winStreak, setWinStreak] = useState(0);
+  const [txPending, setTxPending] = useState<string | null>(null);
+  const [lastTxHash, setLastTxHash] = useState<string>("");
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const tokenSymbol = "CAPY";
+
+  const refreshBalance = useCallback(async () => {
+    if (!wallet.provider || !wallet.account) return;
+    try {
+      const b = await getTokenBalance(wallet.provider, wallet.account);
+      setBalance(b);
+    } catch {
+      setBalance(0n);
+    }
+  }, [wallet.provider, wallet.account]);
+
+  const refreshFees = useCallback(async () => {
+    if (!wallet.provider) return;
+    try {
+      const fees = await fetchVaultFees(wallet.provider);
+      setLevelFee(fees.levelFee);
+      setItemFee(fees.itemFee);
+      setWinReward(fees.winReward);
+    } catch {
+      // fall back to env defaults
+    }
+  }, [wallet.provider]);
+
+  useEffect(() => {
+    refreshBalance();
+    refreshFees();
+  }, [refreshBalance, refreshFees]);
 
   useEffect(() => {
     if (!started) return;
@@ -29,10 +99,127 @@ export default function Game() {
     return () => clearTimeout(timer);
   }, [started]);
 
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (!event.data || typeof event.data !== "object") return;
+      const { type, payload } = event.data;
+      if (type === "CAPY_LEVEL_START") {
+        setCurrentLevel(Number(payload?.level ?? currentLevel));
+      } else if (type === "CAPY_LEVEL_WIN") {
+        setWinStreak((s) => s + 1);
+        setMessage({ type: "success", text: `第 ${payload?.level} 关通过！` });
+      } else if (type === "CAPY_LEVEL_LOSE") {
+        setWinStreak(0);
+        setMessage({ type: "error", text: "挑战失败，连胜重置" });
+      } else if (type === "CAPY_USE_ITEM") {
+        handleUseItem();
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [currentLevel]);
+
+  const ensureAllowance = async (amount: bigint) => {
+    if (!wallet.signer || !wallet.account || !GAME_VAULT_ADDRESS) return false;
+    const allowance = await getTokenAllowance(wallet.provider!, wallet.account, GAME_VAULT_ADDRESS);
+    if (allowance < amount) {
+      setTxPending("授权中…");
+      await approveToken(wallet.signer, GAME_VAULT_ADDRESS, amount * 10n);
+      setTxPending(null);
+    }
+    return true;
+  };
+
+  const handlePayLevel = async () => {
+    if (!wallet.isConnected || !wallet.signer) {
+      setMessage({ type: "error", text: "请先连接钱包" });
+      return;
+    }
+    if (balance < levelFee) {
+      setMessage({ type: "error", text: `CAPY 余额不足（需要 ${formatGameAmount(levelFee)}）` });
+      return;
+    }
+    try {
+      setTxPending("支付门票中…");
+      await ensureAllowance(levelFee);
+      const hash = await payLevel(wallet.signer, currentLevel);
+      setLastTxHash(hash);
+      setMessage({ type: "success", text: `第 ${currentLevel} 关门票已支付` });
+      await refreshBalance();
+      // auto start game on first pay
+      if (!started) setStarted(true);
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "支付失败" });
+    } finally {
+      setTxPending(null);
+    }
+  };
+
+  const handleUseItem = async () => {
+    if (!wallet.isConnected || !wallet.signer) {
+      setMessage({ type: "error", text: "请先连接钱包" });
+      return;
+    }
+    if (balance < itemFee) {
+      setMessage({ type: "error", text: `CAPY 余额不足（需要 ${formatGameAmount(itemFee)}）` });
+      return;
+    }
+    try {
+      setTxPending("道具支付中…");
+      await ensureAllowance(itemFee);
+      const hash = await useItem(wallet.signer);
+      setLastTxHash(hash);
+      setMessage({ type: "success", text: "道具已使用，代币已销毁" });
+      await refreshBalance();
+      // tell the game the item purchase succeeded
+      iframeRef.current?.contentWindow?.postMessage({ type: "CAPY_ITEM_GRANTED" }, "*");
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "道具支付失败" });
+    } finally {
+      setTxPending(null);
+    }
+  };
+
+  const handleClaimReward = async () => {
+    if (!wallet.isConnected || !wallet.signer) {
+      setMessage({ type: "error", text: "请先连接钱包" });
+      return;
+    }
+    if (winStreak < levelsForReward) {
+      setMessage({ type: "error", text: `需连胜 ${levelsForReward} 关才能领奖` });
+      return;
+    }
+    if (!SIGNATURE_BACKEND) {
+      setMessage({ type: "error", text: "领奖签名服务未配置" });
+      return;
+    }
+    try {
+      setTxPending("领取奖励中…");
+      const res = await fetch(`${SIGNATURE_BACKEND}/api/game/sign-reward`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ player: wallet.account }),
+      });
+      if (!res.ok) throw new Error("签名服务不可用");
+      const { signature } = await res.json();
+      const hash = await claimReward(wallet.signer, signature);
+      setLastTxHash(hash);
+      setWinStreak(0);
+      setMessage({ type: "success", text: `奖励 ${formatGameAmount(winReward)} CAPY 已发放` });
+      await refreshBalance();
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "领奖失败" });
+    } finally {
+      setTxPending(null);
+    }
+  };
+
   const handleStart = () => {
-    setStarted(true);
-    setLoading(true);
-    setIframeError(false);
+    if (!GAME_VAULT_ADDRESS) {
+      setMessage({ type: "error", text: "游戏金库地址未配置" });
+      return;
+    }
+    handlePayLevel();
   };
 
   return (
@@ -42,13 +229,89 @@ export default function Game() {
           <h1 className="hand text-2xl font-black text-[#8A5F38] sm:text-3xl">卡皮巴拉冲冲冲</h1>
           <p className="mt-1 text-sm text-[#8A7258]">超解压合成小游戏，随时随地来一局</p>
         </div>
-        <button
-          onClick={() => navigate("/")}
-          className="capy-btn-ghost hidden sm:inline-flex"
-        >
+        <button onClick={() => navigate("/")} className="capy-btn-ghost hidden sm:inline-flex">
           <Home className="h-4 w-4" />
           返回首页
         </button>
+      </div>
+
+      {message && (
+        <div
+          className={cn(
+            "mb-4 rounded-xl px-4 py-3 text-sm",
+            message.type === "success"
+              ? "border border-[#A3D9A5] bg-[#E8F5E9] text-[#2E7D32]"
+              : "border border-[#EF9A9A] bg-[#FFEBEE] text-[#C62828]",
+          )}
+        >
+          {message.text}
+          {lastTxHash && (
+            <a
+              href={`https://bscscan.com/tx/${lastTxHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 underline"
+            >
+              查看交易
+            </a>
+          )}
+        </div>
+      )}
+
+      <div className="capy-section mb-4 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Wallet className="h-5 w-5 text-[#8A5F38]" />
+          {wallet.isConnected ? (
+            <div className="text-sm">
+              <span className="text-[#8A7258]">{shortAddress(wallet.account || "")}</span>
+              <span className="mx-2 text-[#D7C4A9]">|</span>
+              <span className="font-bold text-[#8A5F38]">
+                {formatGameAmount(balance)} {tokenSymbol}
+              </span>
+            </div>
+          ) : (
+            <span className="text-sm text-[#8A7258]">未连接钱包</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {!wallet.isConnected ? (
+            <button onClick={wallet.connectWallet} disabled={wallet.loading} className="capy-btn-main text-sm">
+              {wallet.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+              连接钱包
+            </button>
+          ) : (
+            <button onClick={wallet.disconnectWallet} className="capy-btn-ghost text-sm">
+              断开钱包
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="capy-section mb-4 grid grid-cols-2 gap-3 px-4 py-3 sm:grid-cols-4">
+        <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
+          <div className="text-xs text-[#8A7258]">每关门票</div>
+          <div className="mt-1 font-bold text-[#8A5F38]">
+            {formatGameAmount(levelFee)} {tokenSymbol}
+          </div>
+        </div>
+        <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
+          <div className="text-xs text-[#8A7258]">道具费用</div>
+          <div className="mt-1 font-bold text-[#8A5F38]">
+            {formatGameAmount(itemFee)} {tokenSymbol}
+          </div>
+        </div>
+        <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
+          <div className="text-xs text-[#8A7258]">连胜奖励</div>
+          <div className="mt-1 font-bold text-[#8A5F38]">
+            {formatGameAmount(winReward)} {tokenSymbol}
+          </div>
+        </div>
+        <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
+          <div className="text-xs text-[#8A7258]">当前连胜</div>
+          <div className="mt-1 font-bold text-[#8A5F38]">
+            {winStreak} / {levelsForReward}
+          </div>
+        </div>
       </div>
 
       {!started ? (
@@ -63,16 +326,46 @@ export default function Game() {
             </span>
           </div>
           <h2 className="hand mb-2 text-2xl font-black text-[#8A5F38] sm:text-3xl">准备好了吗？</h2>
-          <p className="mb-8 max-w-md px-2 text-sm text-[#8A7258]">
-            点击下方按钮进入游戏。若首次加载较慢，请耐心等待可爱的卡皮巴拉出来陪你玩～
+          <p className="mb-6 max-w-md px-2 text-sm text-[#8A7258]">
+            连接钱包并支付 {formatGameAmount(levelFee)} {tokenSymbol} 即可开始第 {currentLevel} 关。
+            连胜 {levelsForReward} 关可领取 {formatGameAmount(winReward)} {tokenSymbol} 大奖！
           </p>
-          <button onClick={handleStart} className="capy-btn-main px-8 py-4 text-base sm:px-10 sm:py-4 sm:text-lg">
-            <Play className="h-5 w-5 fill-current" />
-            开始游戏
+          <button
+            onClick={handleStart}
+            disabled={txPending !== null}
+            className="capy-btn-main px-8 py-4 text-base sm:px-10 sm:py-4 sm:text-lg"
+          >
+            {txPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Coins className="h-5 w-5" />}
+            {txPending || `支付 ${formatGameAmount(levelFee)} CAPY 开始游戏`}
           </button>
         </div>
       ) : (
         <div className="capy-section p-1.5 sm:p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <button onClick={handlePayLevel} disabled={txPending !== null} className="capy-btn-main text-sm">
+                <Coins className="h-4 w-4" />
+                {txPending || `支付第 ${currentLevel} 关`}
+              </button>
+              <button onClick={handleUseItem} disabled={txPending !== null} className="capy-btn-ghost text-sm">
+                <Flame className="h-4 w-4" />
+                道具 {formatGameAmount(itemFee)}
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              {winStreak >= levelsForReward && (
+                <button onClick={handleClaimReward} disabled={txPending !== null} className="capy-btn-main text-sm">
+                  <Trophy className="h-4 w-4" />
+                  领奖 {formatGameAmount(winReward)}
+                </button>
+              )}
+              <button onClick={() => setStarted(false)} className="capy-btn-ghost text-sm">
+                <RotateCcw className="h-4 w-4" />
+                返回
+              </button>
+            </div>
+          </div>
+
           <div className="relative w-full overflow-hidden rounded-2xl bg-[#F7F1E2]" style={{ minHeight: "60vh", height: "auto" }}>
             {loading && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-[#8A5F38]">
@@ -121,6 +414,10 @@ export default function Game() {
       )}
     </div>
   );
+}
+
+function shortAddress(address: string) {
+  return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
 }
 
 function cn(...classes: Array<string | false | undefined>) {
