@@ -32,6 +32,9 @@ import {
 const GAME_SRC = "/game-capy-rush/index.html";
 const SIGNATURE_BACKEND = String(import.meta.env.VITE_GAME_SIGNER_URL ?? "").trim();
 
+// 支付功能开关：暂时关闭前端支付 UI，代码保留，后续设为 true 即可恢复
+const PAYMENT_ENABLED = false;
+
 export default function Game() {
   const navigate = useNavigate();
   const wallet = useWallet();
@@ -156,6 +159,10 @@ export default function Game() {
   };
 
   const handleUseItem = async () => {
+    if (!PAYMENT_ENABLED) {
+      iframeRef.current?.contentWindow?.postMessage({ type: "CAPY_ITEM_GRANTED" }, "*");
+      return;
+    }
     if (!wallet.isConnected || !wallet.signer) {
       setMessage({ type: "error", text: "请先连接钱包" });
       return;
@@ -215,11 +222,15 @@ export default function Game() {
   };
 
   const handleStart = () => {
-    if (!GAME_VAULT_ADDRESS) {
-      setMessage({ type: "error", text: "游戏金库地址未配置" });
-      return;
+    if (PAYMENT_ENABLED) {
+      if (!GAME_VAULT_ADDRESS) {
+        setMessage({ type: "error", text: "游戏金库地址未配置" });
+        return;
+      }
+      handlePayLevel();
+    } else {
+      setStarted(true);
     }
-    handlePayLevel();
   };
 
   return (
@@ -258,61 +269,65 @@ export default function Game() {
         </div>
       )}
 
-      <div className="capy-section mb-4 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Wallet className="h-5 w-5 text-[#8A5F38]" />
-          {wallet.isConnected ? (
-            <div className="text-sm">
-              <span className="text-[#8A7258]">{shortAddress(wallet.account || "")}</span>
-              <span className="mx-2 text-[#D7C4A9]">|</span>
-              <span className="font-bold text-[#8A5F38]">
-                {formatGameAmount(balance)} {tokenSymbol}
-              </span>
-            </div>
-          ) : (
-            <span className="text-sm text-[#8A7258]">未连接钱包</span>
-          )}
+      {PAYMENT_ENABLED && (
+        <div className="capy-section mb-4 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Wallet className="h-5 w-5 text-[#8A5F38]" />
+            {wallet.isConnected ? (
+              <div className="text-sm">
+                <span className="text-[#8A7258]">{shortAddress(wallet.account || "")}</span>
+                <span className="mx-2 text-[#D7C4A9]">|</span>
+                <span className="font-bold text-[#8A5F38]">
+                  {formatGameAmount(balance)} {tokenSymbol}
+                </span>
+              </div>
+            ) : (
+              <span className="text-sm text-[#8A7258]">未连接钱包</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {!wallet.isConnected ? (
+              <button onClick={wallet.connectWallet} disabled={wallet.loading} className="capy-btn-main text-sm">
+                {wallet.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                连接钱包
+              </button>
+            ) : (
+              <button onClick={wallet.disconnectWallet} className="capy-btn-ghost text-sm">
+                断开钱包
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {!wallet.isConnected ? (
-            <button onClick={wallet.connectWallet} disabled={wallet.loading} className="capy-btn-main text-sm">
-              {wallet.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
-              连接钱包
-            </button>
-          ) : (
-            <button onClick={wallet.disconnectWallet} className="capy-btn-ghost text-sm">
-              断开钱包
-            </button>
-          )}
-        </div>
-      </div>
+      )}
 
-      <div className="capy-section mb-4 grid grid-cols-2 gap-3 px-4 py-3 sm:grid-cols-4">
-        <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
-          <div className="text-xs text-[#8A7258]">每关门票</div>
-          <div className="mt-1 font-bold text-[#8A5F38]">
-            {formatGameAmount(levelFee)} {tokenSymbol}
+      {PAYMENT_ENABLED && (
+        <div className="capy-section mb-4 grid grid-cols-2 gap-3 px-4 py-3 sm:grid-cols-4">
+          <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
+            <div className="text-xs text-[#8A7258]">每关门票</div>
+            <div className="mt-1 font-bold text-[#8A5F38]">
+              {formatGameAmount(levelFee)} {tokenSymbol}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
+            <div className="text-xs text-[#8A7258]">道具费用</div>
+            <div className="mt-1 font-bold text-[#8A5F38]">
+              {formatGameAmount(itemFee)} {tokenSymbol}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
+            <div className="text-xs text-[#8A7258]">连胜奖励</div>
+            <div className="mt-1 font-bold text-[#8A5F38]">
+              {formatGameAmount(winReward)} {tokenSymbol}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
+            <div className="text-xs text-[#8A7258]">当前连胜</div>
+            <div className="mt-1 font-bold text-[#8A5F38]">
+              {winStreak} / {levelsForReward}
+            </div>
           </div>
         </div>
-        <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
-          <div className="text-xs text-[#8A7258]">道具费用</div>
-          <div className="mt-1 font-bold text-[#8A5F38]">
-            {formatGameAmount(itemFee)} {tokenSymbol}
-          </div>
-        </div>
-        <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
-          <div className="text-xs text-[#8A7258]">连胜奖励</div>
-          <div className="mt-1 font-bold text-[#8A5F38]">
-            {formatGameAmount(winReward)} {tokenSymbol}
-          </div>
-        </div>
-        <div className="rounded-xl bg-[#FFFDF6] p-3 text-center">
-          <div className="text-xs text-[#8A7258]">当前连胜</div>
-          <div className="mt-1 font-bold text-[#8A5F38]">
-            {winStreak} / {levelsForReward}
-          </div>
-        </div>
-      </div>
+      )}
 
       {!started ? (
         <div className="capy-section flex flex-col items-center px-4 py-12 text-center sm:py-16">
@@ -327,33 +342,44 @@ export default function Game() {
           </div>
           <h2 className="hand mb-2 text-2xl font-black text-[#8A5F38] sm:text-3xl">准备好了吗？</h2>
           <p className="mb-6 max-w-md px-2 text-sm text-[#8A7258]">
-            连接钱包并支付 {formatGameAmount(levelFee)} {tokenSymbol} 即可开始第 {currentLevel} 关。
-            连胜 {levelsForReward} 关可领取 {formatGameAmount(winReward)} {tokenSymbol} 大奖！
+            {PAYMENT_ENABLED
+              ? `连接钱包并支付 ${formatGameAmount(levelFee)} ${tokenSymbol} 即可开始第 ${currentLevel} 关。连胜 ${levelsForReward} 关可领取 ${formatGameAmount(winReward)} ${tokenSymbol} 大奖！`
+              : "点击开始，随时随地来一局超解压合成小游戏！"}
           </p>
           <button
             onClick={handleStart}
             disabled={txPending !== null}
             className="capy-btn-main px-8 py-4 text-base sm:px-10 sm:py-4 sm:text-lg"
           >
-            {txPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Coins className="h-5 w-5" />}
-            {txPending || `支付 ${formatGameAmount(levelFee)} CAPY 开始游戏`}
+            {txPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : PAYMENT_ENABLED ? (
+              <Coins className="h-5 w-5" />
+            ) : (
+              <Gamepad2 className="h-5 w-5" />
+            )}
+            {txPending || (PAYMENT_ENABLED ? `支付 ${formatGameAmount(levelFee)} CAPY 开始游戏` : "开始游戏")}
           </button>
         </div>
       ) : (
         <div className="capy-section p-1.5 sm:p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            {PAYMENT_ENABLED ? (
+              <div className="flex items-center gap-2">
+                <button onClick={handlePayLevel} disabled={txPending !== null} className="capy-btn-main text-sm">
+                  <Coins className="h-4 w-4" />
+                  {txPending || `支付第 ${currentLevel} 关`}
+                </button>
+                <button onClick={handleUseItem} disabled={txPending !== null} className="capy-btn-ghost text-sm">
+                  <Flame className="h-4 w-4" />
+                  道具 {formatGameAmount(itemFee)}
+                </button>
+              </div>
+            ) : (
+              <div />
+            )}
             <div className="flex items-center gap-2">
-              <button onClick={handlePayLevel} disabled={txPending !== null} className="capy-btn-main text-sm">
-                <Coins className="h-4 w-4" />
-                {txPending || `支付第 ${currentLevel} 关`}
-              </button>
-              <button onClick={handleUseItem} disabled={txPending !== null} className="capy-btn-ghost text-sm">
-                <Flame className="h-4 w-4" />
-                道具 {formatGameAmount(itemFee)}
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              {winStreak >= levelsForReward && (
+              {PAYMENT_ENABLED && winStreak >= levelsForReward && (
                 <button onClick={handleClaimReward} disabled={txPending !== null} className="capy-btn-main text-sm">
                   <Trophy className="h-4 w-4" />
                   领奖 {formatGameAmount(winReward)}
