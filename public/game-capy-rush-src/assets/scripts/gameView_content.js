@@ -191,6 +191,7 @@ var v = require("./jsonConfig");
 var C = require("./myJsonCtl");
 var w = require("./gameView_levelBtn");
 var b = require("./gameView_timeNode");
+var capyBridge = require("./CapyPaymentBridge").default;
 var M = cc._decorator;
 var k = M.ccclass;
 M.property;
@@ -452,6 +453,7 @@ var S = function (t) {
     c.ManageCtl.myMsgCtl.emit(d.MyConstans.msg.showPopupView, _.uiPath.uiName.popup_gameBackView);
   };
   e.prototype.startGame = function () {
+    capyBridge && capyBridge.levelStart && capyBridge.levelStart(this._curLevelId);
     return r(this, undefined, undefined, function () {
       var t;
       var e;
@@ -725,6 +727,15 @@ var S = function (t) {
     var t = this;
     var e = this.getLevelComp();
     if (e && e.func_revive) {
+      // 区块链支付开启时：把死亡事件和复活回调交给前端处理
+      if (capyBridge && capyBridge.isPaymentEnabled && capyBridge.isPaymentEnabled()) {
+        return void capyBridge.levelLose(this._curLevelId, function () {
+          var e = t.getLevelComp();
+          e.isEnd = false;
+          e.func_revive();
+        });
+      }
+      // 免费模式：保留原有复活/道具弹窗逻辑
       if (this._curModeId == 1) {
         var n = e.func_check_clearFood();
         return void c.ManageCtl.myMsgCtl.emit(d.MyConstans.msg.showPopupView, _.uiPath.uiName.popup_gameLoseView, {
@@ -765,6 +776,7 @@ var S = function (t) {
     }
   };
   e.prototype.onGameSuccess = function () {
+    capyBridge && capyBridge.levelWin && capyBridge.levelWin(this._curLevelId);
     return r(this, undefined, undefined, function () {
       var t;
       var e;

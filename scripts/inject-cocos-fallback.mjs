@@ -61,6 +61,9 @@ const targets = [
   "E:/dapp/web-mobile/index.html",
 ];
 
+const MAIN_SCRIPT_RE = /<script src="main\.[a-f0-9]+\.js" charset="utf-8"><\/script>/;
+const STUB_RE = /<!-- Cocos web build fallback stubs[\s\S]*?<script src="main\.[a-f0-9]+\.js" charset="utf-8"><\/script>/;
+
 for (const target of targets) {
   const filePath = path.resolve(target);
   if (!fs.existsSync(filePath)) {
@@ -68,10 +71,24 @@ for (const target of targets) {
     continue;
   }
   let html = fs.readFileSync(filePath, "utf8");
-  html = html.replace(
-    /<!-- Cocos web build fallback stubs[\s\S]*?<script src="main\.4cb20\.js" charset="utf-8"><\/script>/,
-    fallbackScript + '\n<script src="main.4cb20.js" charset="utf-8"></script>'
-  );
+  const mainMatch = html.match(MAIN_SCRIPT_RE);
+  if (!mainMatch) {
+    console.log("skip (main script not found):", filePath);
+    continue;
+  }
+  const mainTag = mainMatch[0];
+
+  if (STUB_RE.test(html)) {
+    // 已有旧桩，整体替换
+    html = html.replace(
+      STUB_RE,
+      fallbackScript + "\n" + mainTag
+    );
+  } else {
+    // 没有桩，插入到 main.js 之前
+    html = html.replace(mainTag, fallbackScript + "\n" + mainTag);
+  }
+
   fs.writeFileSync(filePath, html, "utf8");
   console.log("updated:", filePath);
 }
