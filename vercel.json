@@ -2,12 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "comment": "游戏后端反向代理：前端调同源 /capy/api/game/*，由 Vercel 转发到服务器，浏览器侧不涉及跨域和混合内容",
       "source": "/capy/:path*",
       "destination": "http://36.151.145.15:8793/:path*"
     },
     {
-      "comment": "SPA 兜底，必须放在最后",
       "source": "/(.*)",
       "destination": "/index.html"
     }
