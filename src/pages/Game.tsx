@@ -78,6 +78,9 @@ export default function Game() {
 
   const [reviveDialog, setReviveDialog] = useState(false);
   const [pendingItem, setPendingItem] = useState(false);
+  // 游戏请求开始某一关时挂在这里：付费关必须先确认链上已进场才放行
+  const [levelRequest, setLevelRequest] = useState<number | null>(null);
+  const [levelRequestPending, setLevelRequestPending] = useState(false);
 
   const [checkInPending, setCheckInPending] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -212,6 +215,71 @@ export default function Game() {
       setClaimable(true);
     }
   }, [sessionId, cleared]);
+
+  /**
+   * 游戏请求开始某一关时的许可判定。
+   * 第 1 关免费直接放行；第 2 关起必须链上已经付过门票（run.active 且档位区间对得上），
+   * 否则挂起请求、弹支付遮罩，付完再放行。没有这道门玩家能白玩到第 11 关。
+   */
+  const handleLevelRequest = useCallback(
+    async (level: number) => {
+      if (!PAYMENT_ENABLED || level <= 1) {
+        postToGame("CAPY_LEVEL_GRANTED", { level });
+        return;
+      }
+      try {
+        if (!wallet.provider || !wallet.account) {
+          setLevelRequest(level); // 让遮罩提示先连钱包
+          return;
+        }
+        const fresh = await fetchPlayerState(wallet.provider, wallet.account);
+        setPlayer(fresh);
+        const tier = fresh.run.active ? fresh.run.tier : fresh.tierNext;
+        const range = levelRangeOf(tier);
+        if (fresh.run.active && level >= range.fromLevel && level <= range.toLevel) {
+          // 门票已付。确保后端会话在（领奖签名要用），然后放行
+          if (!sessionId) {
+            const sid = await startBackendSession().catch(() => null);
+            if (sid) setSessionId(sid);
+          }
+          postToGame("CAPY_LEVEL_GRANTED", { level });
+          return;
+        }
+      } catch {
+        // 读链失败也走支付遮罩，宁可多问一次也不要放过去
+      }
+      setLevelRequest(level);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [PAYMENT_ENABLED, postToGame, wallet.provider, wallet.account, sessionId],
+  );
+
+  /** 遮罩里点「支付门票」 */
+  const confirmLevelPayment = async () => {
+    if (levelRequest == null) return;
+    setLevelRequestPending(true);
+    try {
+      await handleEnterTier();
+      const sid = await startBackendSession();
+      if (!sid) throw new Error("后端会话未返回 sessionId");
+      setSessionId(sid);
+      setCleared(0);
+      setClaimable(false);
+      postToGame("CAPY_LEVEL_GRANTED", { level: levelRequest });
+      setLevelRequest(null);
+    } catch (err) {
+      showError(err, "支付门票失败");
+    } finally {
+      setLevelRequestPending(false);
+    }
+  };
+
+  /** 遮罩里点「放弃」——告诉游戏不要开始这一关 */
+  const cancelLevelPayment = () => {
+    if (levelRequest == null) return;
+    postToGame("CAPY_LEVEL_DENIED", { level: levelRequest });
+    setLevelRequest(null);
+  };
 
   const signReward = async () => {
     if (!sessionId) throw new Error("没有活跃会话");
@@ -525,7 +593,15 @@ export default function Game() {
     const handleMessage = (event: MessageEvent) => {
       if (!event.data || typeof event.data !== "object") return;
       const { type, payload } = event.data;
-      if (type === "CAPY_LEVEL_START") {
+      if (type === "CAPY_BRIDGE_READY") {
+        // 桥接就绪，立刻同步支付开关，避免竞态
+        postToGame("CAPY_PAYMENT_ENABLED", { enabled: PAYMENT_ENABLED });
+      } else if (type === "CAPY_LEVEL_REQUEST") {
+        // 游戏要开始某一关，先确认能不能开：免费关直接放行，付费关必须链上已进场
+        const level = Number(payload?.level ?? currentLevel);
+        setCurrentLevel(level);
+        void handleLevelRequest(level);
+      } else if (type === "CAPY_LEVEL_START") {
         const level = Number(payload?.level ?? currentLevel);
         setCurrentLevel(level);
       } else if (type === "CAPY_LEVEL_WIN") {
@@ -545,7 +621,7 @@ export default function Game() {
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [currentLevel, sessionId, cleared, PAYMENT_ENABLED, handleUseItem, reportLevelToBackend]);
+  }, [currentLevel, sessionId, cleared, PAYMENT_ENABLED, handleUseItem, reportLevelToBackend, handleLevelRequest, postToGame]);
 
   const checkInActive = Boolean(player && player.checkInExpiry > Date.now() / 1000);
   const checkInExpiryText = player?.checkInExpiry
@@ -643,6 +719,45 @@ export default function Game() {
             </div>
           )}
         </div>
+
+        {levelRequest != null && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 p-4">
+            <div className="w-full max-w-sm rounded-2xl bg-[#FFFDF6] p-6 text-center shadow-xl">
+              <Coins className="mx-auto h-10 w-10 text-[#C8811F]" />
+              <h3 className="mt-3 text-lg font-bold text-[#8A5F38]">
+                第 {levelRequest} 关需要门票
+              </h3>
+              <p className="mt-1 text-sm text-[#8A7258]">
+                第 1 关是免费体验。从第 2 关起按档位收费，支付{" "}
+                {econ ? formatGameAmount(econ.ticket) : "--"} CAPY 可进入第 {fromLevel}~{toLevel} 关，
+                连过 10 关可领 {econ ? formatGameAmount(rewardForTier(econ, currentTier)) : "--"} CAPY。
+              </p>
+              {!wallet.isConnected && (
+                <p className="mt-2 text-xs text-[#B53E2A]">请先连接钱包</p>
+              )}
+              <p className="mt-2 text-xs text-[#8A7258]">
+                余额 {formatGameAmount(balance)} {tokenSymbol}
+              </p>
+              <div className="mt-5 flex gap-3">
+                <button
+                  onClick={cancelLevelPayment}
+                  disabled={levelRequestPending}
+                  className="capy-btn-ghost flex-1 text-sm"
+                >
+                  放弃
+                </button>
+                <button
+                  onClick={confirmLevelPayment}
+                  disabled={levelRequestPending || !wallet.isConnected}
+                  className="capy-btn-main flex-1 text-sm"
+                >
+                  <Coins className="h-3 w-3" />
+                  {levelRequestPending ? txPending || "处理中…" : "支付门票"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {reviveDialog && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 p-4">

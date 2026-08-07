@@ -452,7 +452,22 @@ var S = function (t) {
     }
     c.ManageCtl.myMsgCtl.emit(d.MyConstans.msg.showPopupView, _.uiPath.uiName.popup_gameBackView);
   };
+  // 付费关（第 2 关起）必须先向父页面申请许可，确认链上已经付过门票才能开始。
+  // 没有这道门的话，玩家打完免费的第 1 关就能一路白玩到第 11 关。
   e.prototype.startGame = function () {
+    var self = this;
+    if (capyBridge && capyBridge.requestLevelStart) {
+      return capyBridge.requestLevelStart(this._curLevelId).then(function (granted) {
+        if (!granted) {
+          cc.log("[capy] level not granted, abort start:", self._curLevelId);
+          return undefined; // 父页面会弹支付提示，这里不开始
+        }
+        return self._startGameInner();
+      });
+    }
+    return this._startGameInner();
+  };
+  e.prototype._startGameInner = function () {
     capyBridge && capyBridge.levelStart && capyBridge.levelStart(this._curLevelId);
     return r(this, undefined, undefined, function () {
       var t;

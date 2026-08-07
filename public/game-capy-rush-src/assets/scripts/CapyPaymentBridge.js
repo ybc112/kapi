@@ -19,7 +19,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *   3. 父页面支付复活费后向 iframe 发送 CAPY_REVIVE_GRANTED
  *   4. bridge 调用 reviveCallback，游戏从当前关卡继续
  *   5. 若父页面发送 CAPY_ABANDON，bridge 清空回调，游戏回到封面
+ *
+ * 开始关卡的许可流程（防止不付门票白玩第 2~11 关）：
+ *   1. 游戏开始一关前调用 await bridge.requestLevelStart(level)
+ *   2. 第 1 关免费、或未启用支付时，直接返回 true
+ *   3. 否则向父页面发送 CAPY_LEVEL_REQUEST，等父页面确认链上已进场
+ *   4. 父页面回 CAPY_LEVEL_GRANTED → 返回 true，游戏正常开始
+ *      父页面回 CAPY_LEVEL_DENIED  → 返回 false，游戏不要开始（父页面会提示支付）
  */
+
+/** 第几关之前是免费体验（和合约里的 FREE_LEVELS 保持一致） */
+var FREE_LEVELS = 1;
+/** 等父页面回复的超时时间（毫秒）。支付要签名+上链，给足时间 */
+var LEVEL_GRANT_TIMEOUT_MS = 180000;
 
 var CapyPaymentBridge = (function () {
   function CapyPaymentBridge() {
@@ -28,6 +40,7 @@ var CapyPaymentBridge = (function () {
     this._reviveCallback = null;
     this._reviveLevel = null;
     this._paymentEnabled = false;
+    this._levelGrant = null; // { level, resolve }
     this._init();
   }
 
@@ -51,7 +64,52 @@ var CapyPaymentBridge = (function () {
       } else if (data.type === "CAPY_PAYMENT_ENABLED") {
         self._paymentEnabled = !!(data.payload && data.payload.enabled);
         cc.log("[CapyPaymentBridge] payment enabled:", self._paymentEnabled);
+      } else if (data.type === "CAPY_LEVEL_GRANTED") {
+        cc.log("[CapyPaymentBridge] level granted", data.payload);
+        self._settleLevelGrant(true);
+      } else if (data.type === "CAPY_LEVEL_DENIED") {
+        cc.log("[CapyPaymentBridge] level denied", data.payload);
+        self._settleLevelGrant(false);
       }
+    });
+    // 主动握手：告诉父页面桥接已就绪，请立刻回一次支付开关状态。
+    // 否则「CAPY_PAYMENT_ENABLED 还没到」的那一小段时间里，付费关会被当成免费关放过去。
+    this._post("CAPY_BRIDGE_READY", {});
+  };
+
+  CapyPaymentBridge.prototype._settleLevelGrant = function (granted) {
+    var pending = this._levelGrant;
+    if (!pending) return;
+    this._levelGrant = null;
+    if (pending.timer) clearTimeout(pending.timer);
+    pending.resolve(granted);
+  };
+
+  /**
+   * 开始一关之前向父页面申请许可。
+   * @param {number} levelNumber
+   * @returns {Promise<boolean>} true = 可以开始，false = 不要开始
+   */
+  CapyPaymentBridge.prototype.requestLevelStart = function (levelNumber) {
+    var self = this;
+    var level = Number(levelNumber);
+    // 未启用支付（免费体验模式）或免费关：直接放行
+    if (!this._paymentEnabled || !(level > FREE_LEVELS)) {
+      return Promise.resolve(true);
+    }
+    // 上一次申请还挂着就先取消掉，避免回调错配
+    this._settleLevelGrant(false);
+    return new Promise(function (resolve) {
+      var pending = { level: level, resolve: resolve, timer: null };
+      pending.timer = setTimeout(function () {
+        if (self._levelGrant === pending) {
+          self._levelGrant = null;
+          cc.warn("[CapyPaymentBridge] level grant timeout, level", level);
+          resolve(false);
+        }
+      }, LEVEL_GRANT_TIMEOUT_MS);
+      self._levelGrant = pending;
+      self._post("CAPY_LEVEL_REQUEST", { level: level, time: Date.now() });
     });
   };
 
