@@ -32,6 +32,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var FREE_LEVELS = 1;
 /** 等父页面回复的超时时间（毫秒）。支付要签名+上链，给足时间 */
 var LEVEL_GRANT_TIMEOUT_MS = 180000;
+/** 道具购买等待超时（毫秒）。原来只有 10 秒，钱包弹窗+签名+上链根本来不及，
+ *  结果游戏先放弃、技能永远加不上。和关卡许可用同一个量级。 */
+var ITEM_GRANT_TIMEOUT_MS = 180000;
 
 var CapyPaymentBridge = (function () {
   function CapyPaymentBridge() {
@@ -41,6 +44,7 @@ var CapyPaymentBridge = (function () {
     this._reviveLevel = null;
     this._paymentEnabled = false;
     this._levelGrant = null; // { level, resolve }
+    this._itemPending = null; // { resolve, timer }
     this._init();
   }
 
@@ -53,7 +57,12 @@ var CapyPaymentBridge = (function () {
       if (!data || typeof data !== "object") return;
       if (data.type === "CAPY_ITEM_GRANTED") {
         self._itemGranted = true;
+        self._settleItem(true);
         cc.log("[CapyPaymentBridge] item purchase confirmed");
+      } else if (data.type === "CAPY_ITEM_DENIED") {
+        // 父页面明确告知失败（余额不足 / 没进场 / 用户取消 / 交易失败）
+        cc.log("[CapyPaymentBridge] item denied", data.payload);
+        self._settleItem(false);
       } else if (data.type === "CAPY_REVIVE_GRANTED") {
         cc.log("[CapyPaymentBridge] revive granted", data.payload);
         self._doRevive(data.payload && data.payload.level);
@@ -172,23 +181,28 @@ var CapyPaymentBridge = (function () {
     return this._waitForItemGranted();
   };
 
+  CapyPaymentBridge.prototype._settleItem = function (granted) {
+    var pending = this._itemPending;
+    if (!pending) return;
+    this._itemPending = null;
+    if (pending.timer) clearTimeout(pending.timer);
+    pending.resolve(granted);
+  };
+
   CapyPaymentBridge.prototype._waitForItemGranted = function () {
     var self = this;
+    // 上一次还挂着就先结掉，避免回调错配
+    this._settleItem(false);
     return new Promise(function (resolve) {
-      var attempts = 0;
-      var timer = setInterval(function () {
-        if (self._itemGranted) {
-          clearInterval(timer);
-          resolve(true);
-          return;
-        }
-        attempts++;
-        if (attempts > 100) {
-          // 10 seconds timeout
-          clearInterval(timer);
+      var pending = { resolve: resolve, timer: null };
+      pending.timer = setTimeout(function () {
+        if (self._itemPending === pending) {
+          self._itemPending = null;
+          cc.warn("[CapyPaymentBridge] item grant timeout");
           resolve(false);
         }
-      }, 100);
+      }, ITEM_GRANT_TIMEOUT_MS);
+      self._itemPending = pending;
     });
   };
 

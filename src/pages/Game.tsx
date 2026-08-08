@@ -454,20 +454,31 @@ export default function Game() {
   };
 
   const handleUseItem = useCallback(async () => {
+    // 失败时必须回 CAPY_ITEM_DENIED，否则游戏会一直干等到超时
+    const deny = (text: string) => {
+      setMessage({ type: "error", text });
+      postToGame("CAPY_ITEM_DENIED", { reason: text });
+    };
     if (!PAYMENT_ENABLED) {
       postToGame("CAPY_ITEM_GRANTED");
       return;
     }
     if (!wallet.isConnected || !wallet.signer) {
-      setMessage({ type: "error", text: "请先连接钱包" });
+      deny("请先连接钱包");
       return;
     }
     if (!econ) {
-      setMessage({ type: "error", text: "经济参数未加载" });
+      deny("经济参数未加载，请刷新页面");
       return;
     }
     if (balance < econ.itemCost) {
-      setMessage({ type: "error", text: `CAPY 余额不足（需要 ${formatGameAmount(econ.itemCost)}）` });
+      deny(`CAPY 余额不足，道具需要 ${formatGameAmount(econ.itemCost)}`);
+      return;
+    }
+    // 合约里 useItem() 要求链上有进行中的闯关（runs[player].active），
+    // 免费的第 1 关没有进场记录，直接调会 revert NoActiveRun。先拦住并说清楚。
+    if (!player?.run.active) {
+      deny(`道具只能在闯关中使用。请先支付 ${formatGameAmount(econ.ticket)} CAPY 门票进场（第 1 关免费体验不支持道具）`);
       return;
     }
     try {
@@ -476,16 +487,17 @@ export default function Game() {
       await ensureAllowance(econ.itemCost);
       const hash = await useItem(wallet.signer);
       setLastTxHash(hash);
-      showSuccess("道具已使用，代币已销毁", hash);
+      showSuccess("道具已使用，40% 已销毁、60% 进奖池", hash);
       await refreshBalance();
       postToGame("CAPY_ITEM_GRANTED");
     } catch (err) {
-      showError(err, "道具支付失败");
+      const text = err instanceof Error ? err.message : "道具支付失败";
+      deny(text);
     } finally {
       setTxPending(null);
       setPendingItem(false);
     }
-  }, [PAYMENT_ENABLED, wallet.isConnected, wallet.signer, econ, balance, postToGame, refreshBalance]);
+  }, [PAYMENT_ENABLED, wallet.isConnected, wallet.signer, econ, balance, player, postToGame, refreshBalance]);
 
   const handleClaimReward = async () => {
     if (!wallet.isConnected || !wallet.signer) {
