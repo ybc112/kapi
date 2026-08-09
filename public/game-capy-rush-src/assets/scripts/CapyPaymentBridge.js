@@ -79,6 +79,11 @@ var CapyPaymentBridge = (function () {
       } else if (data.type === "CAPY_LEVEL_DENIED") {
         cc.log("[CapyPaymentBridge] level denied", data.payload);
         self._settleLevelGrant(false);
+      } else if (data.type === "CAPY_RESET_PROGRESS") {
+        // 换钱包了：清掉游戏本地存档（关卡进度 / 道具 / 模式解锁等），
+        // 让游戏从第 1 关重新开始。键前缀固定为 kpblccc_（SdkConfig.projectName）。
+        cc.log("[CapyPaymentBridge] reset progress", data.payload);
+        self._resetProgress();
       }
     });
     // 主动握手：告诉父页面桥接已就绪，请立刻回一次支付开关状态。
@@ -120,6 +125,39 @@ var CapyPaymentBridge = (function () {
       self._levelGrant = pending;
       self._post("CAPY_LEVEL_REQUEST", { level: level, time: Date.now() });
     });
+  };
+
+  /**
+   * 换钱包时清空游戏本地进度。
+   * localStorage 键都是 kpblccc_ 前缀；清完清掉挂起的回调，
+   * 然后通知父页面重载 iframe —— 游戏重新加载时会读到已清空的存档，
+   * 从第 1 关开始（游戏内 _curLevelId 是内存变量，只有重载才能彻底归零）。
+   */
+  CapyPaymentBridge.prototype._resetProgress = function () {
+    if (typeof cc === "undefined" || !cc.sys || !cc.sys.localStorage) return;
+    try {
+      var keys = Object.keys(cc.sys.localStorage);
+      var cleared = 0;
+      for (var i = 0; i < keys.length; i++) {
+        if (keys[i].indexOf("kpblccc_") === 0) {
+          cc.sys.localStorage.removeItem(keys[i]);
+          cleared += 1;
+        }
+      }
+      cc.log("[CapyPaymentBridge] cleared", cleared, "localStorage keys");
+    } catch (e) {
+      cc.error("[CapyPaymentBridge] reset progress error", e);
+      return;
+    }
+    // 清掉挂起的道具/复活/关卡许可回调，避免重载前的残留 Promise 回调错配
+    this._settleItem(false);
+    this._settleLevelGrant(false);
+    this._reviveCallback = null;
+    this._reviveLevel = null;
+    // 通知父页面：可以重载 iframe 了
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: "CAPY_PROGRESS_RESET_DONE", payload: {} }, "*");
+    }
   };
 
   CapyPaymentBridge.prototype._post = function (type, payload) {

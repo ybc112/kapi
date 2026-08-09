@@ -85,6 +85,8 @@ export default function Game() {
   const [levelRequestMode, setLevelRequestMode] = useState<"pay" | "claim">("pay");
   // 弹窗内的错误提示（页面级 message 会被弹窗遮罩挡住，用户以为「点不动」）
   const [levelRequestError, setLevelRequestError] = useState<string | null>(null);
+  // 换钱包后重载游戏 iframe 用：key 变化 React 会重新挂载 iframe
+  const [gameKey, setGameKey] = useState(0);
 
   const [checkInPending, setCheckInPending] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -163,6 +165,23 @@ export default function Game() {
       postToGame("CAPY_PAYMENT_ENABLED", { enabled: PAYMENT_ENABLED });
     }
   }, [started, postToGame]);
+
+  // 钱包地址变化 = 换人了，游戏存档（关卡进度）要跟着重置，
+  // 否则新钱包会接着上一个钱包的关卡继续玩（localStorage 是浏览器的，跟钱包无关）
+  const walletRef = useRef(wallet.account);
+  useEffect(() => {
+    const prev = walletRef.current;
+    walletRef.current = wallet.account;
+    if (wallet.account && prev && prev.toLowerCase() !== wallet.account.toLowerCase()) {
+      // 等到 iframe 挂载完再发，否则消息丢了
+      const t = setTimeout(() => {
+        if (iframeRef.current?.contentWindow) {
+          postToGame("CAPY_RESET_PROGRESS", {});
+        }
+      }, 300);
+      return () => clearTimeout(t);
+    }
+  }, [wallet.account, postToGame]);
 
   const ensureAllowance = async (amount: bigint) => {
     if (!wallet.signer || !wallet.account || !GAME_VAULT_ADDRESS) return false;
@@ -633,6 +652,18 @@ export default function Game() {
       if (type === "CAPY_BRIDGE_READY") {
         // 桥接就绪，立刻同步支付开关，避免竞态
         postToGame("CAPY_PAYMENT_ENABLED", { enabled: PAYMENT_ENABLED });
+      } else if (type === "CAPY_PROGRESS_RESET_DONE") {
+        // 游戏已清档，重载 iframe 让游戏从第 1 关重新开始，并重置前端状态
+        setGameKey((k) => k + 1);
+        setStarted(false);
+        setLoading(true);
+        setCleared(0);
+        setClaimable(false);
+        setSessionId(null);
+        setCurrentLevel(1);
+        setLevelRequest(null);
+        setLevelRequestMode("pay");
+        setLevelRequestError(null);
       } else if (type === "CAPY_LEVEL_REQUEST") {
         // 游戏要开始某一关，先确认能不能开：免费关直接放行，付费关必须链上已进场
         const level = Number(payload?.level ?? currentLevel);
@@ -727,6 +758,7 @@ export default function Game() {
             </div>
           )}
           <iframe
+            key={gameKey}
             ref={iframeRef}
             src={GAME_SRC}
             title="卡皮巴拉冲冲冲"
