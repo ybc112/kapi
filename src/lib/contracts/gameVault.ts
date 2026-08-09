@@ -91,7 +91,10 @@ export function parseGameAmount(value: string): bigint {
 }
 
 export function formatGameAmount(value: bigint): string {
-  return formatUnits(value, TOKEN_DECIMALS);
+  // 只保留最多 4 位小数，别把 18 位尾数全显示出来
+  const n = Number(formatUnits(value, TOKEN_DECIMALS));
+  if (!Number.isFinite(n)) return "0";
+  return n.toLocaleString("zh-CN", { maximumFractionDigits: 4 });
 }
 
 export async function getTokenBalance(provider: Provider, account: string): Promise<bigint> {

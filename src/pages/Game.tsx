@@ -81,6 +81,8 @@ export default function Game() {
   // 游戏请求开始某一关时挂在这里：付费关必须先确认链上已进场才放行
   const [levelRequest, setLevelRequest] = useState<number | null>(null);
   const [levelRequestPending, setLevelRequestPending] = useState(false);
+  // 弹窗模式：pay = 付门票进档；claim = 上一档已通关但没领奖，先领奖
+  const [levelRequestMode, setLevelRequestMode] = useState<"pay" | "claim">("pay");
 
   const [checkInPending, setCheckInPending] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -245,9 +247,18 @@ export default function Game() {
           postToGame("CAPY_LEVEL_GRANTED", { level });
           return;
         }
+        if (fresh.run.active) {
+          // 有进行中的 run，但请求的关卡超出了本档区间 = 本档已通关、还没领奖。
+          // 先领奖（领完 run 清空、tierNext+1），再付下一档门票，不能直接 enterTier
+          //（合约会 revert RunAlreadyActive）。
+          setLevelRequestMode("claim");
+          setLevelRequest(level);
+          return;
+        }
       } catch {
         // 读链失败也走支付遮罩，宁可多问一次也不要放过去
       }
+      setLevelRequestMode("pay");
       setLevelRequest(level);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -267,6 +278,7 @@ export default function Game() {
       setClaimable(false);
       postToGame("CAPY_LEVEL_GRANTED", { level: levelRequest });
       setLevelRequest(null);
+      setLevelRequestMode("pay");
     } catch (err) {
       showError(err, "支付门票失败");
     } finally {
@@ -530,6 +542,10 @@ export default function Game() {
       showSuccess(`第 ${signed.tier} 档奖励 ${formatGameAmount(reward)} CAPY 已发放`, hash);
       await refreshBalance();
       await refreshPlayer();
+      // 领奖后如果弹窗还开着（通关未领奖模式），切回「支付下一档门票」模式
+      if (levelRequest != null) {
+        setLevelRequestMode("pay");
+      }
     } catch (err) {
       showError(err, "领奖失败");
     } finally {
@@ -745,14 +761,29 @@ export default function Game() {
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 p-4">
             <div className="w-full max-w-sm rounded-2xl bg-[#FFFDF6] p-6 text-center shadow-xl">
               <Coins className="mx-auto h-10 w-10 text-[#C8811F]" />
-              <h3 className="mt-3 text-lg font-bold text-[#8A5F38]">
-                第 {levelRequest} 关需要门票
-              </h3>
-              <p className="mt-1 text-sm text-[#8A7258]">
-                第 1 关是免费体验。从第 2 关起按档位收费，支付{" "}
-                {econ ? formatGameAmount(econ.ticket) : "--"} CAPY 可进入第 {fromLevel}~{toLevel} 关，
-                连过 10 关可领 {econ ? formatGameAmount(rewardForTier(econ, currentTier)) : "--"} CAPY。
-              </p>
+              {levelRequestMode === "claim" ? (
+                <>
+                  <h3 className="mt-3 text-lg font-bold text-[#8A5F38]">
+                    本档 {fromLevel}~{toLevel} 关已通关
+                  </h3>
+                  <p className="mt-1 text-sm text-[#8A7258]">
+                    先领取{" "}
+                    {econ ? formatGameAmount(rewardForTier(econ, currentTier)) : "--"} CAPY
+                    奖励，再支付下一档门票进入第 {levelRequest} 关。
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="mt-3 text-lg font-bold text-[#8A5F38]">
+                    第 {levelRequest} 关需要门票
+                  </h3>
+                  <p className="mt-1 text-sm text-[#8A7258]">
+                    第 1 关是免费体验。从第 2 关起按档位收费，支付{" "}
+                    {econ ? formatGameAmount(econ.ticket) : "--"} CAPY 可进入第 {fromLevel}~{toLevel} 关，
+                    连过 10 关可领 {econ ? formatGameAmount(rewardForTier(econ, currentTier)) : "--"} CAPY。
+                  </p>
+                </>
+              )}
               {!wallet.isConnected && (
                 <p className="mt-2 text-xs text-[#B53E2A]">请先连接钱包</p>
               )}
@@ -767,14 +798,25 @@ export default function Game() {
                 >
                   放弃
                 </button>
-                <button
-                  onClick={confirmLevelPayment}
-                  disabled={levelRequestPending || !wallet.isConnected}
-                  className="capy-btn-main flex-1 text-sm"
-                >
-                  <Coins className="h-3 w-3" />
-                  {levelRequestPending ? txPending || "处理中…" : "支付门票"}
-                </button>
+                {levelRequestMode === "claim" ? (
+                  <button
+                    onClick={handleClaimReward}
+                    disabled={levelRequestPending || !wallet.isConnected}
+                    className="capy-btn-main flex-1 text-sm"
+                  >
+                    <Trophy className="h-3 w-3" />
+                    {txPending || "领取奖励"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={confirmLevelPayment}
+                    disabled={levelRequestPending || !wallet.isConnected}
+                    className="capy-btn-main flex-1 text-sm"
+                  >
+                    <Coins className="h-3 w-3" />
+                    {levelRequestPending ? txPending || "处理中…" : "支付门票"}
+                  </button>
+                )}
               </div>
             </div>
           </div>
