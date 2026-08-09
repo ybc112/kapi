@@ -83,6 +83,8 @@ export default function Game() {
   const [levelRequestPending, setLevelRequestPending] = useState(false);
   // 弹窗模式：pay = 付门票进档；claim = 上一档已通关但没领奖，先领奖
   const [levelRequestMode, setLevelRequestMode] = useState<"pay" | "claim">("pay");
+  // 弹窗内的错误提示（页面级 message 会被弹窗遮罩挡住，用户以为「点不动」）
+  const [levelRequestError, setLevelRequestError] = useState<string | null>(null);
 
   const [checkInPending, setCheckInPending] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -253,6 +255,7 @@ export default function Game() {
           //（合约会 revert RunAlreadyActive）。
           setLevelRequestMode("claim");
           setLevelRequest(level);
+          setLevelRequestError(null);
           return;
         }
       } catch {
@@ -260,6 +263,7 @@ export default function Game() {
       }
       setLevelRequestMode("pay");
       setLevelRequest(level);
+      setLevelRequestError(null);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [PAYMENT_ENABLED, postToGame, wallet.provider, wallet.account, sessionId],
@@ -521,7 +525,7 @@ export default function Game() {
       return;
     }
     if (!sessionId) {
-      setMessage({ type: "error", text: "没有可领奖的会话" });
+      setLevelRequestError("没有可领奖的会话。如果刚刷新过页面或后端重启过，本档进度已丢失，请放弃后重新闯关。");
       return;
     }
     try {
@@ -547,7 +551,12 @@ export default function Game() {
         setLevelRequestMode("pay");
       }
     } catch (err) {
-      showError(err, "领奖失败");
+      const text = err instanceof Error ? err.message : "领奖失败";
+      if (levelRequest != null) {
+        setLevelRequestError(text);
+      } else {
+        showError(err, "领奖失败");
+      }
     } finally {
       setTxPending(null);
     }
@@ -790,6 +799,11 @@ export default function Game() {
               <p className="mt-2 text-xs text-[#8A7258]">
                 余额 {formatGameAmount(balance)} {tokenSymbol}
               </p>
+              {levelRequestError && (
+                <p className="mt-2 rounded-lg bg-[#B53E2A]/10 p-2 text-xs text-[#B53E2A]">
+                  {levelRequestError}
+                </p>
+              )}
               <div className="mt-5 flex gap-3">
                 <button
                   onClick={cancelLevelPayment}
