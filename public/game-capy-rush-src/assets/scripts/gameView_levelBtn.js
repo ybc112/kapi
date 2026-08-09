@@ -46,6 +46,7 @@ var l = require("./myBtnClick");
 var u = require("./statsCtl");
 var d = require("./uiPathManage");
 var h = require("./common_setBtnCanClick");
+var capyBridge = require("./CapyPaymentBridge").default;
 var p = cc._decorator;
 var f = p.ccclass;
 p.property;
@@ -145,6 +146,20 @@ var m = function (t) {
               e.gameContent.showGameButton();
             });
           }
+          // 区块链支付开启且没有库存时：用 CAPY 购买道具（5000 枚）
+          if (capyBridge && capyBridge.isPaymentEnabled && capyBridge.isPaymentEnabled()) {
+            capyBridge.useItem(s.MyConstans.propId.bomb).then(function (granted) {
+              if (!granted) return;
+              e.gameContent.hideGameButton();
+              n.func_boom();
+              r.ManageCtl.myMsgCtl.emit(s.MyConstans.msg.updatePropCount);
+              n.func_boomCb = function () {
+                e.gameContent.showGameButton();
+              };
+              e.sendUsePropShushu();
+            });
+            return;
+          }
           this.playVideo(function () {
             e.gameContent.hideGameButton();
             n.func_boom();
@@ -195,6 +210,19 @@ var m = function (t) {
               e.gameContent.showGameButton();
             });
           }
+          // 区块链支付开启且没有库存时：用 CAPY 购买道具（5000 枚）
+          if (capyBridge && capyBridge.isPaymentEnabled && capyBridge.isPaymentEnabled()) {
+            capyBridge.useItem(s.MyConstans.propId.remove).then(function (granted) {
+              if (!granted) return;
+              e.gameContent.hideGameButton();
+              n.func_clearFood();
+              n.func_checkclearCb = function () {
+                e.gameContent.showGameButton();
+              };
+              e.sendUsePropShushu();
+            });
+            return;
+          }
           this.playVideo(function () {
             e.gameContent.hideGameButton();
             n.func_clearFood();
@@ -231,6 +259,15 @@ var m = function (t) {
             r.ManageCtl.gameData.addDayPropById(s.MyConstans.propId.flip, -1);
             r.ManageCtl.myMsgCtl.emit(s.MyConstans.msg.updatePropCount);
             return void n.func_reverse();
+          }
+          // 区块链支付开启且没有库存时：用 CAPY 购买道具（5000 枚）
+          if (capyBridge && capyBridge.isPaymentEnabled && capyBridge.isPaymentEnabled()) {
+            capyBridge.useItem(s.MyConstans.propId.flip).then(function (granted) {
+              if (!granted) return;
+              n.func_reverse();
+              e.sendUsePropShushu();
+            });
+            return;
           }
           this.playVideo(function () {
             n.func_reverse();

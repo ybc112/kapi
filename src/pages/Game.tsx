@@ -692,6 +692,15 @@ export default function Game() {
               <span className="text-sm">游戏加载中…</span>
             </div>
           )}
+          {/* 浮动 CAPY 余额：游戏 iframe 内看不到链上余额，叠加在右上角 */}
+          {started && !loading && (
+            <div className="pointer-events-none absolute right-2 top-2 z-20 flex items-center gap-1.5 rounded-full bg-[#FFFDF6]/95 px-3 py-1.5 text-xs font-bold text-[#8A5F38] shadow-lg">
+              <Coins className="h-3.5 w-3.5 text-[#C8811F]" />
+              <span>
+                {wallet.isConnected ? `${formatGameAmount(balance)} ${tokenSymbol}` : "未连接钱包"}
+              </span>
+            </div>
+          )}
           <iframe
             ref={iframeRef}
             src={GAME_SRC}
