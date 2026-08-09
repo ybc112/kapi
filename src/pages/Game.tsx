@@ -206,7 +206,11 @@ export default function Game() {
     if (hash) setLastTxHash(hash);
   };
 
-  const startBackendSession = async (): Promise<string | null> => {
+  /**
+   * 开启/恢复后端会话。后端已支持复用未过期会话（startSession 返回已有 sessionId +
+   * 真实 cleared），所以刷新页面后重新开局不会丢进度，领奖前也能恢复。
+   */
+  const startBackendSession = async (): Promise<{ sessionId: string; cleared?: number } | null> => {
     if (!SIGNATURE_BACKEND || !wallet.account) return null;
     const res = await fetch(`${SIGNATURE_BACKEND}/api/game/session/start`, {
       method: "POST",
@@ -218,26 +222,67 @@ export default function Game() {
       throw new Error(err.error || "开局会话失败");
     }
     const data = await res.json();
-    return data.sessionId ?? null;
+    if (!data.sessionId) return null;
+    return {
+      sessionId: data.sessionId,
+      cleared: data.cleared !== undefined ? Number(data.cleared) : undefined,
+    };
   };
 
-  const reportLevelToBackend = useCallback(async (level: number) => {
-    if (!sessionId) return;
-    const res = await fetch(`${SIGNATURE_BACKEND}/api/game/session/level`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ sessionId, level }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || "关卡上报失败");
-    }
-    const data = await res.json();
-    setCleared(Number(data.cleared ?? cleared + 1));
-    if (Number(data.remaining ?? 0) === 0) {
-      setClaimable(true);
-    }
-  }, [sessionId, cleared]);
+  const reportLevelToBackend = useCallback(
+    async (level: number) => {
+      // 第 1 关是免费体验关，后端从第 2 关（from = 2 + tier*10）开始严格计数，
+      // 上报第 1 关只会得到「关卡顺序不对」，直接跳过。
+      if (level <= 1) return;
+
+      let sid = sessionId;
+      if (!sid) {
+        // 刷新页面后 sessionId 丢了：先尝试恢复会话（后端会返回未过期的旧会话），
+        // 而不是静默跳过上报——否则赢了关后端却不知道，最后领不了奖。
+        const started = await startBackendSession().catch(() => null);
+        if (started?.sessionId) {
+          setSessionId(started.sessionId);
+          sid = started.sessionId;
+          if (started.cleared !== undefined) setCleared(started.cleared);
+        }
+      }
+      if (!sid) return;
+
+      // 后端 RPC 抽风时上报会失败：重试 3 次（1.5s / 3s / 4.5s 退避），
+      // 全部失败才提示用户，避免「赢了关但进度没记上」的静默丢失。
+      for (let attempt = 1; attempt <= 3; attempt += 1) {
+        try {
+          const res = await fetch(`${SIGNATURE_BACKEND}/api/game/session/level`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ sessionId: sid, level }),
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || "关卡上报失败");
+          }
+          const data = await res.json();
+          setCleared(Number(data.cleared ?? cleared + 1));
+          if (Number(data.remaining ?? 0) === 0) {
+            setClaimable(true);
+          }
+          return;
+        } catch (err) {
+          if (attempt < 3) {
+            await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
+          } else {
+            const text = err instanceof Error ? err.message : "关卡上报失败";
+            setMessage({
+              type: "error",
+              text: `第 ${level} 关进度上报失败（${text}）。继续闯关可能导致本档无法领奖，建议放弃本档后重新闯关。`,
+            });
+          }
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sessionId, cleared],
+  );
 
   /**
    * 游戏请求开始某一关时的许可判定。
@@ -263,7 +308,7 @@ export default function Game() {
           // 门票已付。确保后端会话在（领奖签名要用），然后放行
           if (!sessionId) {
             const sid = await startBackendSession().catch(() => null);
-            if (sid) setSessionId(sid);
+            if (sid?.sessionId) setSessionId(sid.sessionId);
           }
           postToGame("CAPY_LEVEL_GRANTED", { level });
           return;
@@ -296,8 +341,8 @@ export default function Game() {
       await handleEnterTier();
       const sid = await startBackendSession();
       if (!sid) throw new Error("后端会话未返回 sessionId");
-      setSessionId(sid);
-      setCleared(0);
+      setSessionId(sid.sessionId);
+      setCleared(sid.cleared ?? 0);
       setClaimable(false);
       postToGame("CAPY_LEVEL_GRANTED", { level: levelRequest });
       setLevelRequest(null);
@@ -316,12 +361,12 @@ export default function Game() {
     setLevelRequest(null);
   };
 
-  const signReward = async () => {
-    if (!sessionId) throw new Error("没有活跃会话");
+  const signReward = async (sid: string) => {
+    if (!sid) throw new Error("没有活跃会话");
     const res = await fetch(`${SIGNATURE_BACKEND}/api/game/sign-reward`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ sessionId }),
+      body: JSON.stringify({ sessionId: sid }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -425,11 +470,12 @@ export default function Game() {
         await handleEnterTier();
       }
 
-      // 开启后端会话（用于领奖签名）
+      // 开启后端会话（用于领奖签名）；后端复用未过期会话时会带回真实 cleared，
+      // 刷新页面后继续闯关进度不丢
       const sid = await startBackendSession();
       if (!sid) throw new Error("后端会话未返回 sessionId");
-      setSessionId(sid);
-      setCleared(0);
+      setSessionId(sid.sessionId);
+      setCleared(sid.cleared ?? 0);
       setClaimable(false);
       setStarted(true);
     } catch (err) {
@@ -543,13 +589,25 @@ export default function Game() {
       setMessage({ type: "error", text: "玩家状态未加载" });
       return;
     }
-    if (!sessionId) {
+
+    // 刷新页面后 sessionId 丢失：先尝试恢复后端会话（后端复用未过期会话，
+    // 带真实 cleared），恢复成功即可正常领奖，不再要求放弃重闯。
+    let sid = sessionId;
+    if (!sid) {
+      const started = await startBackendSession().catch(() => null);
+      if (started?.sessionId) {
+        setSessionId(started.sessionId);
+        sid = started.sessionId;
+        if (started.cleared !== undefined) setCleared(started.cleared);
+      }
+    }
+    if (!sid) {
       setLevelRequestError("没有可领奖的会话。如果刚刷新过页面或后端重启过，本档进度已丢失，请放弃后重新闯关。");
       return;
     }
     try {
       setTxPending("领取奖励中…");
-      const signed = await signReward();
+      const signed = await signReward(sid);
       const reward = BigInt(signed.reward ?? "0");
       const hash = await claimReward(
         wallet.signer,
